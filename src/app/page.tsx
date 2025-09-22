@@ -6,8 +6,8 @@ import Image from "next/image";
 import Link from "next/link";
 interface songDet {
   id: string;
-  image: { url: string }[];
   name: string;
+  image: { url: string }[];
 }
 export default function home() {
   const [songsData, setsongsData] = useState<songDet[]>([]);
@@ -18,7 +18,7 @@ export default function home() {
         setLoading(true);
         const data = await getTrendingSongs();
         console.log(data, "iam from home");
-        setsongsData(data || []);
+        setsongsData(data);
       } catch (e) {
         console.log("something went wrong with api", e);
       } finally {
@@ -38,7 +38,15 @@ export default function home() {
         ) : (
           <div className="w-full grid grid-cols-3 md:grid-cols-5 lg:grid-cols-7  gap-5 items-center justify-center pl-8">
             {songsData.map((playlists, idx) => (
-              <Link href={`/player/${playlists.id}`} key={idx}>
+              <Link
+                href={{
+                  pathname: `/player/${playlists.id}`,
+                  query: {
+                    img: playlists.image[2].url || playlists.image[0].url,
+                  },
+                }}
+                key={idx}
+              >
                 <div
                   className="flex flex-col gap-2 cursor-pointer"
                   onClick={() => navigatePlayer(playlists.id)}

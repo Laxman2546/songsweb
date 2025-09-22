@@ -1,29 +1,43 @@
 import axios from "axios";
-interface songResponse {
-  link: string;
-  data: { songs: string };
+interface Playlist {
+  id: string;
+  title: string;
+  image: string;
 }
-const BASE_URL = process.env.url;
+
+interface TrendingSongsResponse {
+  data: {
+    results: Playlist[];
+  };
+}
+
+interface SongUrlResponse {
+  data: string;
+}
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+
 export const getTrendingSongs = async () => {
   try {
-    const getSongs = await axios.get(
-      `${BASE_URL}/search/playlists?query=telugu&page=5&limit=1000`
+    const { data } = await axios.get<TrendingSongsResponse>(
+      `${API_BASE_URL}/search/playlists?query=telugu&page=5&limit=1000`
     );
-    console.log(getSongs.data.data.results);
-    return getSongs.data.data.results;
+    console.log(data.data.results);
+    return data.data.results;
   } catch (e) {
-    console.log(e, "something went wrong while fetchhing songs");
+    console.error("Something went wrong while fetching trending songs:", e);
+    throw e;
   }
 };
 
-export const getSongurl = async (id: String): Promise<string | undefined> => {
+export const getSongUrl = async (id: string): Promise<string> => {
   try {
-    const { data } = await axios.get<songResponse>(
-      `https://jiosavan-api-with-playlist.vercel.app/api/playlists?id=${id}&limit=100`
+    const { data } = await axios.get<SongUrlResponse>(
+      `${API_BASE_URL}/playlists?id=${id}&limit=100`
     );
-    console.log(data.data.songs);
-    return data.data.songs;
+    return data.data;
   } catch (e) {
-    console.log("something went wrong with the image", e);
+    console.error("Something went wrong while fetching the song URL:", e);
+    throw e;
   }
 };
