@@ -20,7 +20,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 export const getTrendingSongs = async () => {
   try {
     const { data } = await axios.get<TrendingSongsResponse>(
-      `${API_BASE_URL}/search/playlists?query=telugu&page=5&limit=1000`
+      `${API_BASE_URL}/search/playlists?query=telugu&page=1&limit=1000`
     );
     console.log(data.data.results);
     return data.data.results;
@@ -34,6 +34,31 @@ export const getSongUrl = async (id: string): Promise<string> => {
   try {
     const { data } = await axios.get<SongUrlResponse>(
       `${API_BASE_URL}/playlists?id=${id}&limit=100`
+    );
+    return data.data;
+  } catch (e) {
+    console.error("Something went wrong while fetching the song URL:", e);
+    throw e;
+  }
+};
+export const getArtist = async (artistName: string): Promise<string> => {
+  try {
+    const { data } = await axios.get<SongUrlResponse>(
+      `${API_BASE_URL}/search/artists?query=${artistName}&page=0&limit=1000`
+    );
+    return data.data;
+  } catch (e) {
+    console.error("Something went wrong while fetching the song URL:", e);
+    throw e;
+  }
+};
+export const getArtistSongsbyID = async (
+  id: number,
+  page: number
+): Promise<string> => {
+  try {
+    const { data } = await axios.get<SongUrlResponse>(
+      `${API_BASE_URL}/artists/${id}/songs?page=${page}&sortBy=popularity&sortOrder=desc`
     );
     return data.data;
   } catch (e) {
