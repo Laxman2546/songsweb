@@ -53,12 +53,34 @@ export const getArtist = async (artistName: string): Promise<string> => {
   }
 };
 export const getArtistSongsbyID = async (
-  id: number,
+  id: any,
   page: number
-): Promise<string> => {
+): Promise<string | any> => {
   try {
     const { data } = await axios.get<SongUrlResponse>(
       `${API_BASE_URL}/artists/${id}/songs?page=${page}&sortBy=popularity&sortOrder=desc`
+    );
+    return data.data;
+  } catch (e) {
+    console.error("Something went wrong while fetching the song URL:", e);
+    throw e;
+  }
+};
+export const getAlbumSongsbyID = async (id: any): Promise<string | any> => {
+  try {
+    const { data } = await axios.get<SongUrlResponse>(
+      `${API_BASE_URL}/albums?id=${id}`
+    );
+    return data.data;
+  } catch (e) {
+    console.error("Something went wrong while fetching the song URL:", e);
+    throw e;
+  }
+};
+export const getQuerySongs = async (search: any): Promise<string | any> => {
+  try {
+    const { data } = await axios.get<SongUrlResponse>(
+      `${API_BASE_URL}/albums?id=${search}`
     );
     return data.data;
   } catch (e) {

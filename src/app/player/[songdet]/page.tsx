@@ -47,11 +47,12 @@ export default function songDetails() {
   return (
     <>
       <DetailsComponent
-        playlistData={playlistData}
+        playlistData={playlistData[0]}
         playName={playlistName}
         playlistDescribe={playlistDescription}
         count={songNo}
         image={playlistImg || ""}
+        type={"Playlist"}
       />
     </>
   );

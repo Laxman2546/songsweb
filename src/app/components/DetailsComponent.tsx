@@ -5,6 +5,7 @@ import React from "react";
 import Image from "next/image";
 import { getSongUrl } from "@/lib/api";
 import { Vibrant } from "node-vibrant/browser";
+import defaultImg from "../../../public/default.png";
 import Link from "next/link";
 const DetailsComponent = ({
   playlistData,
@@ -12,16 +13,19 @@ const DetailsComponent = ({
   playlistDescribe,
   count,
   image,
+  type,
 }: {
   playlistData: any;
   playName: string;
   playlistDescribe: string;
   count: string;
   image: string;
+  type: string;
 }) => {
   const [bgGradient, setBgGradient] = useState<string>(
     "linear-gradient(to bottom, #000, #111)"
   );
+  console.log(image);
   useEffect(() => {
     if (!image) return;
 
@@ -30,14 +34,13 @@ const DetailsComponent = ({
       .then((palette: any) => {
         if (palette.Vibrant && palette.DarkMuted) {
           const color1 = palette.LightVibrant.hex;
-          const color2 = palette.LightMuted.hex;
           setBgGradient(`linear-gradient(to bottom, ${color1}, black)`);
         }
       });
   }, [image]);
 
   const cleanSongName = (songName: String) => {
-    return songName.replace(/&quot;|&amp;/g, '"');
+    return decodeURIComponent(songName.replace(/&quot;|&amp;/g, '"'));
   };
   const durationMin = (time: number) => {
     const minutes = Math.floor(time / 60);
@@ -54,16 +57,20 @@ const DetailsComponent = ({
         className="w-full p-12 rounded-t-2xl flex flex-row gap-5 items-center"
         style={{ background: bgGradient }}
       >
-        <Image
-          src={image as string}
-          width={240}
-          height={120}
-          className="rounded-md"
-          alt="songimage"
-        />
+        {image && (
+          <Image
+            src={image}
+            width={240}
+            height={120}
+            className="rounded-md"
+            alt="songimage"
+          />
+        )}
         <div className="w-full flex flex-col gap-3">
-          <h1 className="text-white font-medium text-xl">Playlist</h1>
-          <h1 className="text-white  font-extrabold text-7xl">{playName}</h1>
+          <h1 className="text-white font-medium text-xl">{type}</h1>
+          <h1 className="text-white  font-extrabold text-7xl">
+            {decodeURIComponent(playName)}
+          </h1>
           <div className="w-full flex flex-col gap-2">
             <p className="text-xl font-medium">
               {cleanSongName(playlistDescribe)}
@@ -84,9 +91,12 @@ const DetailsComponent = ({
               </h1>
             </div>
             <div className="flex flex-row items-center justify-center gap-8 text-white">
-              <p className="w-20 text-right font-light text-sm text-gray-400 italic">
-                Count
-              </p>
+              {type == "Playlist" ||
+                (type == "Album" && (
+                  <p className="w-20 text-right font-light text-sm text-gray-400 italic">
+                    Count
+                  </p>
+                ))}
               <p className="w-40 truncate font-light text-sm text-gray-400 italic">
                 Album
               </p>
@@ -97,14 +107,18 @@ const DetailsComponent = ({
           </div>
           <span className="w-full h-[1px] bg-gray-200"></span>
         </div>
-        {playlistData[0]?.map((playlists: any, idx: number) => (
+        {playlistData?.map((playlists: any, idx: number) => (
           <div key={idx}>
             <div className="max-w-full flex flex-row items-center justify-between p-2 pr-24 hover:bg-gray-500 rounded-xl">
               <div className="flex flex-row items-center gap-6">
                 <div className="flex flex-row items-center gap-3">
                   <h1 className="text-md w-8 text-right">{idx + 1}</h1>
                   <Image
-                    src={playlists.image[1].url}
+                    src={
+                      playlists.image[1].url
+                        ? playlists.image[1].url
+                        : defaultImg
+                    }
                     width={50}
                     height={50}
                     className="rounded-sm"
@@ -123,6 +137,9 @@ const DetailsComponent = ({
                           ? playlists.artists.primary[0].name
                           : "unknown"
                       )}`,
+                      query: {
+                        id: playlists.artists.primary[0].id,
+                      },
                     }}
                   >
                     <p className="text-md text-white cursor-pointer hover:underline">
@@ -134,12 +151,17 @@ const DetailsComponent = ({
                 </div>
               </div>
               <div className="flex flex-row items-center gap-8 text-white">
-                <p className="w-20 text-right">
-                  {countData(playlists.playCount)}
-                </p>
-                <p className="w-40 truncate cursor-pointer hover:underline">
-                  {cleanSongName(playlists.album.name)}
-                </p>
+                {type == "Playlist" ||
+                  (type == "Album" && (
+                    <p className="w-20 text-right">
+                      {countData(playlists.playCount)}
+                    </p>
+                  ))}
+                <Link href={{ pathname: `/album/${playlists.album.id}` }}>
+                  <p className="w-40 truncate cursor-pointer hover:underline">
+                    {cleanSongName(playlists.album.name)}
+                  </p>
+                </Link>
                 <p className="w-16 text-right">
                   {durationMin(playlists.duration)}
                 </p>

@@ -1,20 +1,29 @@
 "use client";
 import DetailsComponent from "@/app/components/DetailsComponent";
 import { getArtist, getArtistSongsbyID } from "@/lib/api";
-import { useParams } from "next/navigation";
-import React, { useEffect, useState } from "react";
-
+import { useParams, useSearchParams } from "next/navigation";
+import React, { useEffect, useRef, useState } from "react";
 const page = () => {
   const { artistname } = useParams<{ artistname: string }>();
-  const [number, setNumber] = useState(0);
-  const fetchArtist = async () => {
+  const [pageNumber, setPageNumber] = useState(0);
+  const [artistImage, setartistImage] = useState("");
+  const [hasMore, setHasMore] = useState<boolean>(true);
+  const loaderRef = useRef<HTMLDivElement | null>(null);
+  const [artistsSongsData, setArtistsSongsData] = useState<any[] | []>([]);
+  const [count, setCount] = useState<string | undefined>("");
+  const artistDescription = `Top songs from ${artistname}`;
+  const searchpararms = useSearchParams();
+  const artistId = searchpararms.get("id");
+  const fetchArtist = async (page: number) => {
     try {
       const response = await getArtist(decodeURIComponent(artistname));
-      console.log(response);
-      if (response) {
-        const id = response.results[0].id || response.results[1].id || 741999;
-        const getArtistSongs = await getArtistSongsbyID(id, number);
+      setartistImage(response.results[0].image[2].url);
+      if (response && artistId) {
+        const getArtistSongs = await getArtistSongsbyID(artistId, page);
         console.log(getArtistSongs);
+        setHasMore(getArtistSongs.songs.length > 0);
+        setArtistsSongsData((prev) => [...prev, ...getArtistSongs.songs]);
+        setCount(getArtistSongs.total);
       }
     } catch (e) {
       console.log(e);
@@ -22,13 +31,48 @@ const page = () => {
   };
 
   useEffect(() => {
-    fetchArtist();
-  });
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore) {
+          setPageNumber((prev) => prev + 1);
+        }
+      },
+      {
+        rootMargin: "25px",
+      }
+    );
+    if (loaderRef.current) {
+      observer.observe(loaderRef.current);
+    }
+
+    return () => {
+      if (loaderRef.current) {
+        observer.unobserve(loaderRef.current);
+      }
+    };
+  }, [hasMore]);
+
+  useEffect(() => {
+    if (artistId) {
+      fetchArtist(pageNumber);
+    }
+  }, [pageNumber, artistId]);
   return (
     <div>
-      {/* <DetailsComponent
-      
-      /> */}
+      <DetailsComponent
+        playlistData={artistsSongsData}
+        playName={artistname}
+        playlistDescribe={artistDescription}
+        count={count || ""}
+        image={artistImage}
+        type="Artist"
+      />
+      {hasMore && (
+        <div ref={loaderRef} className="text-center mt-4">
+          <p>Loading more songs...</p>
+        </div>
+      )}
+      {artistsSongsData.length === 0 && !hasMore && <p>No songs available.</p>}
     </div>
   );
 };

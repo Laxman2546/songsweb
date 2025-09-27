@@ -9,10 +9,21 @@ import {
   UserCircle,
   X,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 export default function Navbar() {
   const [searchQuery, setSearchQuery] = useState("");
+  const router = useRouter();
+  useEffect(() => {
+    if (!searchQuery.trim()) return;
+
+    const delayDebounce = setTimeout(() => {
+      router.push(`/?q=${encodeURIComponent(searchQuery)}`);
+    }, 500);
+
+    return () => clearTimeout(delayDebounce);
+  }, [searchQuery, router]);
   return (
     <>
       <div className="w-full p-3 flex flex-row  items-center justify-between ">
@@ -45,7 +56,10 @@ export default function Navbar() {
             />
             {searchQuery.length > 0 && searchQuery != "" && (
               <X
-                onClick={() => setSearchQuery("")}
+                onClick={() => {
+                  setSearchQuery("");
+                  router.push("/");
+                }}
                 size={24}
                 className="absolute right-5 top-3 text-gray-400 hover:text-white cursor-pointer"
               />

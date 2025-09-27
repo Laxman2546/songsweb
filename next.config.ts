@@ -10,6 +10,11 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
+        hostname: "www.jiosaavn.com",
+        port: "",
+      },
+      {
+        protocol: "https",
         hostname: "wsrv.nl",
         port: "",
       },

@@ -3,6 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "./components/Navbar";
 import { ScrollToTop } from "./components/ScrollTop";
+import SearchHandler from "./components/SearchHandler";
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -20,18 +22,17 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black text-white`}
-        cz-shortcut-listen="true"
       >
         <ScrollToTop />
         <Navbar />
-        {children}
+        <SearchHandler>{children}</SearchHandler>
       </body>
     </html>
   );
