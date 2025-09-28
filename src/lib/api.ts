@@ -77,10 +77,10 @@ export const getAlbumSongsbyID = async (id: any): Promise<string | any> => {
     throw e;
   }
 };
-export const getQuerySongs = async (search: any): Promise<string | any> => {
+export const getQuerySongs = async (query: any): Promise<string | any> => {
   try {
     const { data } = await axios.get<SongUrlResponse>(
-      `${API_BASE_URL}/albums?id=${search}`
+      `${API_BASE_URL}/search/songs?query=${query}`
     );
     return data.data;
   } catch (e) {
