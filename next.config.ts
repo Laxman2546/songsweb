@@ -18,6 +18,11 @@ const nextConfig: NextConfig = {
         hostname: "wsrv.nl",
         port: "",
       },
+      {
+        protocol: "https",
+        hostname: "pli.saavncdn.com",
+        port: "",
+      },
     ],
   },
 };

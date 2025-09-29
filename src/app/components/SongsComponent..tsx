@@ -1,10 +1,6 @@
 "use client";
-import { useParams, useSearchParams } from "next/navigation";
-import { use, useEffect, useState } from "react";
 import React from "react";
 import Image from "next/image";
-import { getSongUrl } from "@/lib/api";
-import { Vibrant } from "node-vibrant/browser";
 import defaultImg from "../../../public/default.png";
 import Link from "next/link";
 const SongsComponent = ({
@@ -111,28 +107,48 @@ const SongsComponent = ({
           ))}
         </div>
       ) : (
-        <div className="w-full flex flex-row gap-5 flex-wrap">
+        <div className="w-full grid grid-cols-2 md:grid-cols-6  lg:grid-cols-7 gap-5">
           {playlistData?.map((playlists: any, idx: number) => (
             <Link
               key={idx}
               href={{
-                pathname: `/artist/${encodeURIComponent(
-                  playlists.name ? playlists.name : "unknown"
-                )}`,
+                pathname:
+                  type == "artists"
+                    ? `/artist/${encodeURIComponent(
+                        playlists.name ? playlists.name : "unknown"
+                      )}`
+                    : `/player/${playlists.id}`,
                 query: {
-                  id: playlists.id ? playlists.id : "741999",
+                  id:
+                    type == "artists"
+                      ? playlists.id
+                        ? playlists.id
+                        : "741999"
+                      : playlists.id,
+                  img: playlists.image?.[2]?.url || playlists.image?.[0]?.url,
                 },
               }}
             >
-              <div className="flex flex-col gap-5 cursor-pointer">
-                <Image
-                  src={playlists.image[2].url}
-                  width={200}
-                  height={160}
-                  alt="Artist image"
-                  className="rounded-full object-center"
+              <div
+                className="flex flex-col items-center gap-3 cursor-pointer 
+                rounded-2xl
+                   hover:scale-105 transition-all duration-300 shadow-md"
+              >
+                <img
+                  src={
+                    playlists.image?.[2]?.url ||
+                    playlists.image?.[0]?.url ||
+                    defaultImg.src
+                  }
+                  width={150}
+                  height={150}
+                  onError={(e) => (e.currentTarget.src = defaultImg.src)}
+                  alt="image"
+                  className={`object-cover shadow-lg ${
+                    type == "artists" ? "rounded-full" : "rounded-xl"
+                  }`}
                 />
-                <p className="max-w-[200px] text-center text-white truncate">
+                <p className="max-w-[80px] md:max-w-[150px] text-center text-white text-sm md:text-base font-medium truncate">
                   {playlists.name}
                 </p>
               </div>

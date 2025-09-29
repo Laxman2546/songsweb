@@ -25,7 +25,6 @@ const DetailsComponent = ({
   const [bgGradient, setBgGradient] = useState<string>(
     "linear-gradient(to bottom, #000, #111)"
   );
-  console.log(image);
   useEffect(() => {
     if (!image) return;
 
