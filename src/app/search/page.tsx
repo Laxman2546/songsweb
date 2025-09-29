@@ -1,5 +1,6 @@
-import { getQuerySongs } from "@/lib/api";
+import { getQuerySongs, getAlbums } from "@/lib/api";
 import React, { useEffect, useState } from "react";
+import SongsComponent from "../components/SongsComponent.";
 
 type SearchResultsProps = {
   query?: string;
@@ -8,13 +9,32 @@ type SearchResultsProps = {
 const SearchResults: React.FC<SearchResultsProps> = ({ query }) => {
   const [active, setActive] = useState("Songs");
   const [resultsData, setrResultsData] = useState([]);
+  const [albumData, setAlbumData] = useState([]);
+  const [artistData, setArtistData] = useState([]);
+  const [playlistData, setPlaylistData] = useState([]);
   const fetchResults = async () => {
-    const response = await getQuerySongs(query);
-    console.log(response);
+    switch (active) {
+      case "Songs":
+        const responseSongs = await getQuerySongs(query);
+        console.log(responseSongs.results);
+        setrResultsData(responseSongs.results);
+      case "Albums":
+        const responseAlbums = await getAlbums(query);
+        console.log(responseAlbums);
+        setAlbumData(responseAlbums.results);
+      case "Artists":
+        const responseArtists = await getQuerySongs(query);
+        console.log(responseArtists);
+        setArtistData(responseArtists.results);
+      case "Playlists":
+        const responsePlaylists = await getQuerySongs(query);
+        console.log(responsePlaylists);
+        setPlaylistData(responsePlaylists.results);
+    }
   };
   useEffect(() => {
     fetchResults();
-  });
+  }, [query]);
   return (
     <div className="p-8 flex flex-col gap-5">
       <div className="flex flex-row gap-8 ">
@@ -65,7 +85,13 @@ const SearchResults: React.FC<SearchResultsProps> = ({ query }) => {
         </h1>
       </div>
       <div>
-        
+        {resultsData.length < 0 ? (
+          <p>No songs found</p>
+        ) : active == "Songs" ? (
+          <SongsComponent playlistData={resultsData} type="Playlist" />
+        ) : (
+          <p>hello</p>
+        )}
       </div>
     </div>
   );

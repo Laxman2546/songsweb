@@ -16,7 +16,7 @@ export default function Navbar() {
   const [searchQuery, setSearchQuery] = useState("");
   const router = useRouter();
   useEffect(() => {
-    if (!searchQuery.trim()) return;
+    if (!searchQuery.trim()) router.push("/");
 
     const delayDebounce = setTimeout(() => {
       router.push(`/?q=${encodeURIComponent(searchQuery)}`);

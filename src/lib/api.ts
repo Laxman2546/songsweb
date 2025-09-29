@@ -80,7 +80,18 @@ export const getAlbumSongsbyID = async (id: any): Promise<string | any> => {
 export const getQuerySongs = async (query: any): Promise<string | any> => {
   try {
     const { data } = await axios.get<SongUrlResponse>(
-      `${API_BASE_URL}/search/songs?query=${query}`
+      `${API_BASE_URL}/search/songs?query=${query}&page=1&limit=10000`
+    );
+    return data.data;
+  } catch (e) {
+    console.error("Something went wrong while fetching the song URL:", e);
+    throw e;
+  }
+};
+export const getAlbums = async (query: any): Promise<string | any> => {
+  try {
+    const { data } = await axios.get<SongUrlResponse>(
+      `${API_BASE_URL}/search/albums?query=${query}&page=1&limit=10000`
     );
     return data.data;
   } catch (e) {
