@@ -1,4 +1,4 @@
-import { getQuerySongs, getAlbums } from "@/lib/api";
+import { getQuerySongs, getAlbums, getArtists } from "@/lib/api";
 import React, { useEffect, useState } from "react";
 import SongsComponent from "../components/SongsComponent.";
 
@@ -16,20 +16,18 @@ const SearchResults: React.FC<SearchResultsProps> = ({ query }) => {
     switch (active) {
       case "Songs":
         const responseSongs = await getQuerySongs(query);
-        console.log(responseSongs.results);
         setrResultsData(responseSongs.results);
       case "Albums":
         const responseAlbums = await getAlbums(query);
-        console.log(responseAlbums);
         setAlbumData(responseAlbums.results);
       case "Artists":
-        const responseArtists = await getQuerySongs(query);
-        console.log(responseArtists);
+        const responseArtists = await getArtists(query);
+        console.log(responseArtists.results, "iam artist");
         setArtistData(responseArtists.results);
-      case "Playlists":
-        const responsePlaylists = await getQuerySongs(query);
-        console.log(responsePlaylists);
-        setPlaylistData(responsePlaylists.results);
+      // case "Playlists":
+      //   const responsePlaylists = await getQuerySongs(query);
+      //   console.log(responsePlaylists);
+      //   setPlaylistData(responsePlaylists.results);
     }
   };
   useEffect(() => {
@@ -85,10 +83,14 @@ const SearchResults: React.FC<SearchResultsProps> = ({ query }) => {
         </h1>
       </div>
       <div>
-        {resultsData.length < 0 ? (
+        {resultsData.length < 1 || albumData.length < 1 ? (
           <p>No songs found</p>
         ) : active == "Songs" ? (
-          <SongsComponent playlistData={resultsData} type="Playlist" />
+          <SongsComponent playlistData={resultsData} type="songs" />
+        ) : active == "Albums" ? (
+          <SongsComponent playlistData={albumData} type="albums" />
+        ) : active == "Artists" ? (
+          <SongsComponent playlistData={artistData} type="artists" />
         ) : (
           <p>hello</p>
         )}

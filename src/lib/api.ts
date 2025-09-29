@@ -99,3 +99,14 @@ export const getAlbums = async (query: any): Promise<string | any> => {
     throw e;
   }
 };
+export const getArtists = async (query: any): Promise<string | any> => {
+  try {
+    const { data } = await axios.get<SongUrlResponse>(
+      `${API_BASE_URL}/search/artists?query=${query}&page=1&limit=10`
+    );
+    return data.data;
+  } catch (e) {
+    console.error("Something went wrong while fetching the song URL:", e);
+    throw e;
+  }
+};

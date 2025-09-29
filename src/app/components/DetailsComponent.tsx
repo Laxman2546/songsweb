@@ -138,7 +138,9 @@ const DetailsComponent = ({
                           : "unknown"
                       )}`,
                       query: {
-                        id: playlists.artists.primary[0].id,
+                        id: playlists.artists.primary[0]
+                          ? playlists.artists.primary[0].id
+                          : "741999",
                       },
                     }}
                   >
@@ -159,7 +161,7 @@ const DetailsComponent = ({
                   ))}
                 <Link href={{ pathname: `/album/${playlists.album.id}` }}>
                   <p className="w-40 truncate cursor-pointer hover:underline">
-                    {cleanSongName(playlists.album.name)}
+                    {cleanSongName(playlists.album.name || "unknown")}
                   </p>
                 </Link>
                 <p className="w-16 text-right">
