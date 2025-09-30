@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { getTrendingSongs } from "@/lib/api";
 import Loader from "./components/Loader";
 import Image from "next/image";
@@ -17,7 +17,6 @@ export default function home() {
       try {
         setLoading(true);
         const data = await getTrendingSongs();
-        console.log(data, "iam from home");
         setsongsData(data);
       } catch (e) {
         console.log("something went wrong with api", e);
@@ -27,7 +26,6 @@ export default function home() {
     };
     getsongs();
   }, []);
-  const navigatePlayer = (id: String) => {};
   return (
     <section className="w-full min-h-screen">
       <div className="w-full h-full items-center justify-center">
@@ -47,10 +45,7 @@ export default function home() {
                 }}
                 key={idx}
               >
-                <div
-                  className="flex flex-col gap-2 cursor-pointer"
-                  onClick={() => navigatePlayer(playlists.id)}
-                >
+                <div className="flex flex-col gap-2 cursor-pointer">
                   <Image
                     src={playlists.image[2].url || playlists.image[0].url}
                     alt="song image"

@@ -1,12 +1,14 @@
 "use client";
 import { useParams, useSearchParams } from "next/navigation";
-import { use, useEffect, useState } from "react";
+import { use, useContext, useEffect, useState } from "react";
 import React from "react";
 import Image from "next/image";
 import { getSongUrl } from "@/lib/api";
 import { Vibrant } from "node-vibrant/browser";
 import defaultImg from "../../../public/default.png";
 import Link from "next/link";
+import { MusicContext } from "@/context/MusicContextProvider";
+
 const DetailsComponent = ({
   playlistData,
   playName,
@@ -50,6 +52,13 @@ const DetailsComponent = ({
     const formattedCount = new Intl.NumberFormat("en-US").format(count);
     return formattedCount;
   };
+  const songContext = useContext(MusicContext);
+  if (!songContext) {
+    throw new Error("MusicContext must be used within MusicContextProvider");
+  }
+
+  const { playSong } = songContext;
+
   return (
     <div className="w-full min-h-screen flex flex-col">
       <div
@@ -126,9 +135,35 @@ const DetailsComponent = ({
                 </div>
 
                 <div className="flex flex-col">
-                  <h1 className="text-xl text-white font-sans font-medium cursor-pointer">
-                    {cleanSongName(playlists.name)}
-                  </h1>
+                  <Link
+                    href="/songplayer"
+                    onClick={() =>
+                      playSong(
+                        {
+                          url: playlists.downloadUrl[3]?.url,
+                          title: cleanSongName(playlists.name),
+                          artist:
+                            playlists.artists.primary[0]?.name || "Unknown",
+                          img:
+                            playlists.image[2]?.url ||
+                            playlists.image[1]?.url ||
+                            defaultImg.src,
+                          duration: playlists.duration,
+                        },
+                        playlistData.map((p: any) => ({
+                          url: p.downloadUrl[3]?.url,
+                          title: cleanSongName(p.name),
+                          artist: p.artists.primary[0]?.name || "Unknown",
+                          img: p.image[1]?.url || defaultImg.src,
+                          duration: p.duration,
+                        }))
+                      )
+                    }
+                  >
+                    <h1 className="text-xl text-white font-sans font-medium cursor-pointer">
+                      {cleanSongName(playlists.name)}
+                    </h1>
+                  </Link>
                   <Link
                     href={{
                       pathname: `/artist/${encodeURIComponent(

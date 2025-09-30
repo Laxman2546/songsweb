@@ -4,6 +4,7 @@ import "./globals.css";
 import Navbar from "./components/Navbar";
 import { ScrollToTop } from "./components/ScrollTop";
 import SearchHandler from "./components/SearchHandler";
+import MusicContextProvider from "@/context/MusicContextProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,9 +31,11 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black text-white`}
       >
-        <ScrollToTop />
-        <Navbar />
-        <SearchHandler>{children}</SearchHandler>
+        <MusicContextProvider>
+          <ScrollToTop />
+          <Navbar />
+          <SearchHandler>{children}</SearchHandler>
+        </MusicContextProvider>
       </body>
     </html>
   );

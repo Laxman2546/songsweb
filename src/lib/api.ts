@@ -22,7 +22,6 @@ export const getTrendingSongs = async () => {
     const { data } = await axios.get<TrendingSongsResponse>(
       `${API_BASE_URL}/search/playlists?query=telugu&page=1&limit=1000`
     );
-    console.log(data.data.results);
     return data.data.results;
   } catch (e) {
     console.error("Something went wrong while fetching trending songs:", e);
