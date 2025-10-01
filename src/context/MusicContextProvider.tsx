@@ -7,6 +7,7 @@ type Song = {
   artist: string;
   img: string;
   duration: number;
+  artistId: number;
 };
 
 type MusicContextType = {
@@ -37,6 +38,7 @@ export default function MusicContextProvider({
     setQueue(allSongs);
     setIsPlaying(true);
   };
+  
 
   return (
     <MusicContext.Provider

@@ -1,16 +1,18 @@
 "use client";
 import Image from "next/image";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { MusicContext } from "@/context/MusicContextProvider";
 import defaultImg from "@/../public/default.png";
 import { Vibrant } from "node-vibrant/browser";
 import { FaPlayCircle } from "react-icons/fa";
 import { FaBackwardStep, FaForwardStep } from "react-icons/fa6";
+import Link from "next/link";
 
 const PlayerCover = () => {
   const music = useContext(MusicContext);
   const songImg = music?.currentSong?.img || defaultImg.src;
 
+  const audioRef = useRef(null);
   const [bgGradient, setBgGradient] = useState<string>(
     "linear-gradient(to bottom, #000, #111)"
   );
@@ -31,7 +33,17 @@ const PlayerCover = () => {
         setBgGradient("linear-gradient(to bottom, #000, #111)");
       });
   }, [songImg]);
+  const togglePlay = () => {
+    const audio = audioRef.current;
+    if (!audio) return;
 
+    if (music?.isPlaying) {
+      audio.pause();
+    } else {
+      audio.play().catch((err) => console.error("Audio play failed:", err));
+    }
+    setIsPlaying(!isPlaying);
+  };
   return (
     <div
       className="relative w-full flex flex-col items-center justify-center rounded-t-3xl"
@@ -64,18 +76,38 @@ const PlayerCover = () => {
               <h1 className="font-semibold text-white text-sm truncate max-w-[250px]">
                 {music?.currentSong?.title || "Unknown Title"}
               </h1>
-              <p className="text-gray-300 text-xs hover:cursor-pointer hover:underline">
-                {music?.currentSong?.artist || "Unknown Artist"}
-              </p>
+              <Link
+                href={{
+                  pathname: `/artist/${encodeURIComponent(
+                    music?.currentSong?.artist
+                      ? music.currentSong.artist
+                      : "unknown"
+                  )}`,
+                  query: {
+                    id: music?.currentSong?.artistId
+                      ? music.currentSong.artistId
+                      : "741999",
+                  },
+                }}
+              >
+                <p className="text-gray-300 text-xs hover:cursor-pointer hover:underline">
+                  {music?.currentSong?.artist || "Unknown Artist"}
+                </p>
+              </Link>
             </div>
           </div>
-
+          <audio
+            ref={audioRef}
+            src={music?.currentSong?.url}
+            onEnded={() => music?.setIsPlaying(false)}
+          ></audio>
           <div className="flex flex-row gap-6 items-center justify-center">
             <FaBackwardStep
               size={28}
               className="text-white/80 hover:text-white transition-transform hover:scale-110 cursor-pointer"
             />
             <FaPlayCircle
+              onClick={togglePlay}
               size={52}
               className="text-black bg-white rounded-full shadow-lg hover:scale-105 transition-transform cursor-pointer p-1"
             />

@@ -40,9 +40,18 @@ const DetailsComponent = ({
       });
   }, [image]);
 
-  const cleanSongName = (songName: String) => {
-    return decodeURIComponent(songName.replace(/&quot;|&amp;/g, '"'));
+  const cleanSongName = (songName?: string): string => {
+    if (!songName) return "";
+    let s = String(songName);
+    s = s.replace(/&quot;/g, '"').replace(/&amp;/g, "&");
+    const safePercent = s.replace(/%(?![0-9A-Fa-f]{2})/g, "%25");
+    try {
+      return decodeURIComponent(safePercent);
+    } catch (err) {
+      return safePercent;
+    }
   };
+
   const durationMin = (time: number) => {
     const minutes = Math.floor(time / 60);
     const seconds = Math.floor(time % 60);
@@ -149,6 +158,7 @@ const DetailsComponent = ({
                             playlists.image[1]?.url ||
                             defaultImg.src,
                           duration: playlists.duration,
+                          artistId: playlists.artists.primary[0].id,
                         },
                         playlistData.map((p: any) => ({
                           url: p.downloadUrl[3]?.url,
@@ -156,12 +166,13 @@ const DetailsComponent = ({
                           artist: p.artists.primary[0]?.name || "Unknown",
                           img: p.image[1]?.url || defaultImg.src,
                           duration: p.duration,
+                          artistId: p.artists.primary[0].id,
                         }))
                       )
                     }
                   >
                     <h1 className="text-xl text-white font-sans font-medium cursor-pointer">
-                      {cleanSongName(playlists.name)}
+                      {cleanSongName(playlists.name) || "unknown"}
                     </h1>
                   </Link>
                   <Link
