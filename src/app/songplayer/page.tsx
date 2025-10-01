@@ -4,7 +4,7 @@ import { useContext, useEffect, useRef, useState } from "react";
 import { MusicContext } from "@/context/MusicContextProvider";
 import defaultImg from "@/../public/default.png";
 import { Vibrant } from "node-vibrant/browser";
-import { FaPlayCircle } from "react-icons/fa";
+import { FaPlayCircle, FaPauseCircle } from "react-icons/fa";
 import { FaBackwardStep, FaForwardStep } from "react-icons/fa6";
 import Link from "next/link";
 
@@ -12,10 +12,11 @@ const PlayerCover = () => {
   const music = useContext(MusicContext);
   const songImg = music?.currentSong?.img || defaultImg.src;
 
-  const audioRef = useRef(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const [bgGradient, setBgGradient] = useState<string>(
     "linear-gradient(to bottom, #000, #111)"
   );
+  
 
   useEffect(() => {
     if (!songImg) return;
@@ -33,17 +34,22 @@ const PlayerCover = () => {
         setBgGradient("linear-gradient(to bottom, #000, #111)");
       });
   }, [songImg]);
-  const togglePlay = () => {
+  useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
 
     if (music?.isPlaying) {
-      audio.pause();
+      audio.play().catch((err) => console.warn("Autoplay failed:", err));
     } else {
-      audio.play().catch((err) => console.error("Audio play failed:", err));
+      audio.pause();
     }
-    setIsPlaying(!isPlaying);
+  }, [music?.isPlaying, music?.currentSong]);
+
+  const togglePlay = () => {
+    if (!music) return;
+    music.setIsPlaying(!music.isPlaying);
   };
+
   return (
     <div
       className="relative w-full flex flex-col items-center justify-center rounded-t-3xl"
@@ -98,22 +104,47 @@ const PlayerCover = () => {
           </div>
           <audio
             ref={audioRef}
-            src={music?.currentSong?.url}
+            src={music?.currentSong?.url || ""}
+            preload="metadata"
+            controls={false}
             onEnded={() => music?.setIsPlaying(false)}
           ></audio>
+          <input
+          type="range"
+          />
           <div className="flex flex-row gap-6 items-center justify-center">
             <FaBackwardStep
+              onClick={music?.playPrev}
               size={28}
-              className="text-white/80 hover:text-white transition-transform hover:scale-110 cursor-pointer"
+              className={`text-white/80  ${
+                music?.currentIdx && music?.currentIdx > 0
+                  ? "cursor-pointer hover:text-white transition-transform hover:scale-110"
+                  : "cursor-not-allowed"
+              }`}
             />
-            <FaPlayCircle
-              onClick={togglePlay}
-              size={52}
-              className="text-black bg-white rounded-full shadow-lg hover:scale-105 transition-transform cursor-pointer p-1"
-            />
+            {music?.isPlaying ? (
+              <FaPauseCircle
+                onClick={togglePlay}
+                size={52}
+                className="text-black bg-white rounded-full shadow-lg hover:scale-105 transition-transform cursor-pointer p-1"
+              />
+            ) : (
+              <FaPlayCircle
+                onClick={togglePlay}
+                size={52}
+                className="text-black bg-white rounded-full shadow-lg hover:scale-105 transition-transform cursor-pointer p-1"
+              />
+            )}
+
             <FaForwardStep
+              onClick={music?.playNext}
               size={28}
-              className="text-white/80 hover:text-white transition-transform hover:scale-110 cursor-pointer"
+              className={`text-white/80  ${
+                music?.queue.length &&
+                music.currentIdx == music?.queue.length - 1
+                  ? "cursor-not-allowed"
+                  : "cursor-pointer hover:text-white transition-transform hover:scale-110"
+              }`}
             />
           </div>
 

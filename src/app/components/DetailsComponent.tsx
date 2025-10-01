@@ -159,15 +159,19 @@ const DetailsComponent = ({
                             defaultImg.src,
                           duration: playlists.duration,
                           artistId: playlists.artists.primary[0].id,
+                          currentIdx: idx,
                         },
-                        playlistData.map((p: any) => ({
+                        playlistData.map((p: any, i: number) => ({
                           url: p.downloadUrl[3]?.url,
                           title: cleanSongName(p.name),
                           artist: p.artists.primary[0]?.name || "Unknown",
-                          img: p.image[1]?.url || defaultImg.src,
+                          img:
+                            p.image[2]?.url || p.img[1].url || defaultImg.src,
                           duration: p.duration,
                           artistId: p.artists.primary[0].id,
-                        }))
+                          currentIdx: i,
+                        })),
+                        idx
                       )
                     }
                   >
