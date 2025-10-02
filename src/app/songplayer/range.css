@@ -1,0 +1,100 @@
+.slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: 5px;
+  background-color: #2a2a2a; /* dark gray background */
+  outline: none;
+  cursor: pointer;
+  position: relative;
+  /* White progress layer */
+  background-image: linear-gradient(90deg, #ffffff, #f5f5f5);
+  background-size: var(--progress, 0%) 100%;
+  background-repeat: no-repeat;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Hover effect */
+.slider:hover {
+  height: 8px;
+
+}
+
+/* Active/pressing effect */
+.slider:active {
+  height: 8px;
+  box-shadow: 0 0 16px rgba(255, 255, 255, 0.3);
+}
+
+/* Webkit thumb */
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5), 0 0 0 0 rgba(255, 255, 255, 0.3);
+  cursor: grab;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  opacity: 0;
+}
+
+.slider:hover::-webkit-slider-thumb {
+  opacity: 1;
+  transform: scale(1.1);
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.6), 0 0 0 4px rgba(255, 255, 255, 0.15);
+}
+
+.slider:active::-webkit-slider-thumb {
+  cursor: grabbing;
+  transform: scale(1.1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5), 0 0 0 6px rgba(255, 255, 255, 0.2);
+  background: #ffffff;
+}
+
+/* Firefox thumb */
+.slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5), 0 0 0 0 rgba(255, 255, 255, 0.3);
+  cursor: grab;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  opacity: 0;
+}
+
+.slider:hover::-moz-range-thumb {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.slider:active::-moz-range-thumb {
+  cursor: grabbing;
+  transform: scale(1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5), 0 0 0 6px rgba(255, 255, 255, 0.2);
+  background: #ffffff;
+}
+
+/* Firefox track */
+.slider::-moz-range-track {
+  background: transparent;
+  border: none;
+}
+
+/* Focus state for accessibility */
+.slider:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+}
+
+.slider:focus-visible::-webkit-slider-thumb {
+  opacity: 1;
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.25);
+}
+
+.slider:focus-visible::-moz-range-thumb {
+  opacity: 1;
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.25);
+}

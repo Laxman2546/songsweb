@@ -5,8 +5,10 @@ import { MusicContext } from "@/context/MusicContextProvider";
 import defaultImg from "@/../public/default.png";
 import { Vibrant } from "node-vibrant/browser";
 import { FaPlayCircle, FaPauseCircle } from "react-icons/fa";
-import { FaBackwardStep, FaForwardStep } from "react-icons/fa6";
+import { FaBackwardStep, FaForwardStep, FaShuffle } from "react-icons/fa6";
+import { MdOutlineLoop } from "react-icons/md";
 import Link from "next/link";
+import "../songplayer/range.css";
 
 const PlayerCover = () => {
   const music = useContext(MusicContext);
@@ -16,7 +18,6 @@ const PlayerCover = () => {
   const [bgGradient, setBgGradient] = useState<string>(
     "linear-gradient(to bottom, #000, #111)"
   );
-  
 
   useEffect(() => {
     if (!songImg) return;
@@ -49,6 +50,35 @@ const PlayerCover = () => {
     if (!music) return;
     music.setIsPlaying(!music.isPlaying);
   };
+  const formatTime = (seconds?: any) => {
+    if (!seconds || isNaN(seconds)) return "00:00";
+    const minutes = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${minutes.toString().padStart(2, "0")}:${secs
+      .toString()
+      .padStart(2, "0")}`;
+  };
+
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      const tag = (document.activeElement?.tagName || "").toLowerCase();
+      const isTyping =
+        tag === "input" ||
+        tag === "textarea" ||
+        document.activeElement?.getAttribute("contenteditable") === "true";
+      if (isTyping) return;
+
+      if (e.code === "Space") {
+        e.preventDefault();
+        togglePlay();
+      }
+      if (e.key === "k") {
+        togglePlay();
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [music?.isPlaying]);
 
   return (
     <div
@@ -65,6 +95,7 @@ const PlayerCover = () => {
           width={450}
           height={360}
           className="rounded-2xl shadow-xl object-cover"
+          onClick={togglePlay}
         />
       </div>
 
@@ -107,45 +138,117 @@ const PlayerCover = () => {
             src={music?.currentSong?.url || ""}
             preload="metadata"
             controls={false}
-            onEnded={() => music?.setIsPlaying(false)}
+            onEnded={() => {
+              music?.setIsPlaying(false);
+              music?.playNext?.();
+            }}
+            onTimeUpdate={() =>
+              music?.setProgress(audioRef.current?.currentTime || 0)
+            }
           ></audio>
-          <input
-          type="range"
-          />
-          <div className="flex flex-row gap-6 items-center justify-center">
-            <FaBackwardStep
-              onClick={music?.playPrev}
-              size={28}
-              className={`text-white/80  ${
-                music?.currentIdx && music?.currentIdx > 0
-                  ? "cursor-pointer hover:text-white transition-transform hover:scale-110"
-                  : "cursor-not-allowed"
-              }`}
-            />
-            {music?.isPlaying ? (
-              <FaPauseCircle
-                onClick={togglePlay}
-                size={52}
-                className="text-black bg-white rounded-full shadow-lg hover:scale-105 transition-transform cursor-pointer p-1"
+          <div className="flex flex-col gap-3">
+            <div className="flex flex-row gap-6 items-center justify-center">
+              <FaShuffle
+                size={15}
+                className={`${
+                  music?.shuffleActive
+                    ? "bg-white text-black p-0.5 rounded-full size-4"
+                    : ""
+                }`}
+                onClick={music?.toggleShuffle}
               />
-            ) : (
-              <FaPlayCircle
-                onClick={togglePlay}
-                size={52}
-                className="text-black bg-white rounded-full shadow-lg hover:scale-105 transition-transform cursor-pointer p-1"
+              <FaBackwardStep
+                onClick={music?.playPrev}
+                size={20}
+                className={`text-white/80  ${
+                  music?.currentIdx && music?.currentIdx > 0
+                    ? "cursor-pointer hover:text-white transition-transform hover:scale-110"
+                    : "cursor-not-allowed"
+                }`}
               />
-            )}
+              {music?.isPlaying ? (
+                <FaPauseCircle
+                  onClick={togglePlay}
+                  tabIndex={0}
+                  onKeyUp={(e) => {
+                    if (
+                      e.key === " " ||
+                      e.key === "Space" ||
+                      e.code === "Space" ||
+                      e.keyCode === 32
+                    ) {
+                      console.log("pressed");
+                      togglePlay();
+                    }
+                  }}
+                  size={35}
+                  className="text-white bg-black rounded-full shadow-lg hover:scale-105 transition-transform cursor-pointer p-0.5"
+                />
+              ) : (
+                <FaPlayCircle
+                  onClick={togglePlay}
+                  tabIndex={0}
+                  onKeyUp={(e) => {
+                    if (
+                      e.key === " " ||
+                      e.key === "Space" ||
+                      e.code === "Space" ||
+                      e.keyCode === 32
+                    ) {
+                      console.log("pressed");
+                      togglePlay();
+                    }
+                  }}
+                  size={35}
+                  className="text-white bg-black rounded-full shadow-lg hover:scale-105 transition-transform cursor-pointer p-0.5"
+                />
+              )}
 
-            <FaForwardStep
-              onClick={music?.playNext}
-              size={28}
-              className={`text-white/80  ${
-                music?.queue.length &&
-                music.currentIdx == music?.queue.length - 1
-                  ? "cursor-not-allowed"
-                  : "cursor-pointer hover:text-white transition-transform hover:scale-110"
-              }`}
-            />
+              <FaForwardStep
+                onClick={music?.playNext}
+                size={20}
+                className={`text-white/80  ${
+                  music?.queue.length &&
+                  music.currentIdx == music?.queue.length - 1
+                    ? "cursor-not-allowed"
+                    : "cursor-pointer hover:text-white transition-transform hover:scale-110"
+                }`}
+              />
+              <MdOutlineLoop size={20} />
+            </div>
+            <div className="w-full flex flex-row gap-3 items-center justify-center">
+              <p className="text-sm font-light text-white">
+                {formatTime(music?.progress)}
+              </p>
+
+              <input
+                type="range"
+                min={0}
+                max={music?.currentSong?.duration ?? 0}
+                value={music?.progress ?? 0}
+                className="slider"
+                style={{
+                  "--progress": `${
+                    music?.currentSong?.duration
+                      ? ((music?.progress ?? 0) /
+                          music?.currentSong?.duration) *
+                        100
+                      : 0
+                  }%`,
+                }}
+                onChange={(e) => {
+                  const newTime = Number(e.target.value);
+                  if (audioRef.current) {
+                    audioRef.current.currentTime = newTime;
+                  }
+                  music?.setProgress?.(newTime);
+                }}
+              />
+
+              <p className="text-sm font-light text-white">
+                {formatTime(music?.currentSong?.duration)}
+              </p>
+            </div>
           </div>
 
           <div className="flex items-center justify-end text-white/60  text-lg hover:text-white cursor-pointer">

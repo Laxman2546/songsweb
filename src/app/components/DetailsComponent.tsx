@@ -52,11 +52,15 @@ const DetailsComponent = ({
     }
   };
 
-  const durationMin = (time: number) => {
-    const minutes = Math.floor(time / 60);
-    const seconds = Math.floor(time % 60);
-    return `${minutes}:${seconds < 10 ? `0${seconds}` : seconds}`;
+  const durationMin = (seconds?: number) => {
+    if (!seconds || isNaN(seconds)) return "00:00";
+    const minutes = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${minutes.toString().padStart(2, "0")}:${secs
+      .toString()
+      .padStart(2, "0")}`;
   };
+
   const countData = (count: number) => {
     const formattedCount = new Intl.NumberFormat("en-US").format(count);
     return formattedCount;
