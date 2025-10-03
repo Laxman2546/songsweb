@@ -12,21 +12,28 @@ const SearchResults: React.FC<SearchResultsProps> = ({ query }) => {
   const [albumData, setAlbumData] = useState([]);
   const [artistData, setArtistData] = useState([]);
   const [playlistData, setPlaylistData] = useState([]);
+  const [loading, setLoading] = useState(false);
   const fetchResults = async () => {
-    switch (active) {
-      case "Songs":
-        const responseSongs = await getQuerySongs(query);
-        setrResultsData(responseSongs.results);
-      case "Albums":
-        const responseAlbums = await getAlbums(query);
-        setAlbumData(responseAlbums.results);
-      case "Artists":
-        const responseArtists = await getArtists(query);
-        setArtistData(responseArtists.results);
-      case "Playlists":
-        const responsePlaylists = await getPlaylists(query);
-        console.log(responsePlaylists.results, "iam playlist");
-        setPlaylistData(responsePlaylists.results);
+    try {
+      setLoading(true);
+      switch (active) {
+        case "Songs":
+          const responseSongs = await getQuerySongs(query);
+          setrResultsData(responseSongs.results);
+        case "Albums":
+          const responseAlbums = await getAlbums(query);
+          setAlbumData(responseAlbums.results);
+        case "Artists":
+          const responseArtists = await getArtists(query);
+          setArtistData(responseArtists.results);
+        case "Playlists":
+          const responsePlaylists = await getPlaylists(query);
+          setPlaylistData(responsePlaylists.results);
+      }
+    } catch (e) {
+      console.log(e, "error in the active songs");
+    } finally {
+      setLoading(false);
     }
   };
   useEffect(() => {
@@ -82,22 +89,30 @@ const SearchResults: React.FC<SearchResultsProps> = ({ query }) => {
         </h1>
       </div>
       <div>
-        {resultsData.length < 1 || albumData.length < 1 ? (
-          <p className="text-3xl font-medium">No {active} found</p>
-        ) : active == "Songs" ? (
-          <SongsComponent playlistData={resultsData} type="songs" />
-        ) : active == "Albums" ? (
-          <SongsComponent playlistData={albumData} type="albums" />
-        ) : active == "Artists" ? (
-          artistData.length > 1 ? (
-            <SongsComponent playlistData={artistData} type="artists" />
-          ) : (
-            <p className="text-3xl font-medium">No {active} found</p>
-          )
-        ) : playlistData.length > 1 ? (
-          <SongsComponent playlistData={playlistData} type="playlists" />
+        {loading ? (
+          <div>
+            <h1 className="text-2xl font-semibold">Fetching songs...</h1>
+          </div>
         ) : (
-          <p className="text-3xl font-medium">No {active} found</p>
+          <>
+            {resultsData.length < 1 || (albumData.length < 1 && !loading) ? (
+              <p className="text-3xl font-medium">No {active} found</p>
+            ) : active == "Songs" ? (
+              <SongsComponent playlistData={resultsData} type="songs" />
+            ) : active == "Albums" ? (
+              <SongsComponent playlistData={albumData} type="albums" />
+            ) : active == "Artists" ? (
+              artistData.length > 1 ? (
+                <SongsComponent playlistData={artistData} type="artists" />
+              ) : (
+                <p className="text-3xl font-medium">No {active} found</p>
+              )
+            ) : playlistData.length > 1 ? (
+              <SongsComponent playlistData={playlistData} type="playlists" />
+            ) : (
+              <p className="text-3xl font-medium">No {active} found</p>
+            )}
+          </>
         )}
       </div>
     </div>

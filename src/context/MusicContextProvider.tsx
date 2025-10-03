@@ -54,7 +54,6 @@ export default function MusicContextProvider({
     setCurrentIdx(index);
     setShuffleActive(false);
   };
-
   const playNext = () => {
     if (currentIdx < queue.length - 1) {
       setCurrentSong(queue[currentIdx + 1]);
@@ -69,7 +68,6 @@ export default function MusicContextProvider({
       setCurrentIdx(currentIdx - 1);
     }
   };
-
   const toggleShuffle = () => {
     if (!currentSong) return;
 

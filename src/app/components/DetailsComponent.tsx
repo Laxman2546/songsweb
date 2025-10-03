@@ -148,8 +148,8 @@ const DetailsComponent = ({
                 </div>
 
                 <div className="flex flex-col">
-                  <Link
-                    href="/songplayer"
+                  <h1
+                    className="text-xl text-white font-sans font-medium cursor-pointer"
                     onClick={() =>
                       playSong(
                         {
@@ -179,10 +179,8 @@ const DetailsComponent = ({
                       )
                     }
                   >
-                    <h1 className="text-xl text-white font-sans font-medium cursor-pointer">
-                      {cleanSongName(playlists.name) || "unknown"}
-                    </h1>
-                  </Link>
+                    {cleanSongName(playlists.name) || "unknown"}
+                  </h1>
                   <Link
                     href={{
                       pathname: `/artist/${encodeURIComponent(

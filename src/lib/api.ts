@@ -120,3 +120,14 @@ export const getPlaylists = async (query: any): Promise<string | any> => {
     throw e;
   }
 };
+export const getSongSuggestions = async (id: any): Promise<string | any> => {
+  try {
+    const { data } = await axios.get<SongUrlResponse>(
+      `${API_BASE_URL}/songs/${id}/suggestions?limit=100`
+    );
+    return data.data;
+  } catch (e) {
+    console.error("Something went wrong while fetching the song URL:", e);
+    throw e;
+  }
+};

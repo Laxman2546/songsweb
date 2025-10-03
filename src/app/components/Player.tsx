@@ -1,0 +1,484 @@
+"use client";
+import Image from "next/image";
+import { useContext, useEffect, useRef, useState } from "react";
+import { MusicContext } from "@/context/MusicContextProvider";
+import defaultImg from "@/../public/default.png";
+import { Vibrant } from "node-vibrant/browser";
+import { FaPlayCircle, FaPauseCircle } from "react-icons/fa";
+import { FaBackwardStep, FaForwardStep, FaShuffle } from "react-icons/fa6";
+import { MdOutlineLoop } from "react-icons/md";
+import Link from "next/link";
+import gsap from "gsap";
+import { MdFullscreen } from "react-icons/md";
+
+const PlayerCover = () => {
+  const [isSeeking, setIsSeeking] = useState(false);
+  const [seekValue, setSeekValue] = useState<number>(0);
+  const music = useContext(MusicContext);
+  const songImg = music?.currentSong?.img || defaultImg.src;
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const controlsRef = useRef<HTMLDivElement>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [isMouseMoving, setIsMouseMoving] = useState<boolean>(false);
+  const [bgGradient, setBgGradient] = useState<string>(
+    "linear-gradient(to bottom, #000, #111)"
+  );
+  const [expanded, setExpanded] = useState(false);
+
+  const handleMouseMove = () => {
+    setIsMouseMoving(true);
+    clearTimeout(timeoutRef.current as NodeJS.Timeout);
+    timeoutRef.current = setTimeout(() => {
+      setIsMouseMoving(false);
+    }, 5000);
+  };
+  useEffect(() => {
+    window.addEventListener("mousemove", handleMouseMove);
+
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      clearTimeout(timeoutRef.current as NodeJS.Timeout);
+    };
+  }, []);
+  useEffect(() => {
+    if (!songImg) return;
+
+    Vibrant.from(songImg)
+      .getPalette()
+      .then((palette: any) => {
+        if (palette.LightVibrant && palette.DarkMuted) {
+          const color1 = palette.LightVibrant.hex;
+          const color2 = palette.DarkMuted.hex;
+          setBgGradient(`linear-gradient(to top, ${color1}, black)`);
+        }
+      })
+      .catch(() => {
+        setBgGradient("linear-gradient(to bottom, #000, #111)");
+      });
+  }, [songImg]);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    if (music?.isPlaying) {
+      audio.play().catch((err) => console.warn("Autoplay failed:", err));
+    } else {
+      audio.pause();
+    }
+  }, [music?.isPlaying, music?.currentSong]);
+
+  useEffect(() => {
+    if (!controlsRef.current) return;
+
+    if (isMouseMoving) {
+      gsap.to(controlsRef.current, {
+        opacity: 1,
+        y: 0,
+        duration: 0.5,
+        ease: "power2.out",
+        display: "block",
+      });
+    } else {
+      gsap.to(controlsRef.current, {
+        opacity: 0,
+        y: 50,
+        duration: 0.5,
+        ease: "power2.in",
+        onComplete: () => {
+          if (controlsRef.current) {
+            gsap.set(controlsRef.current, { display: "none" });
+          }
+        },
+      });
+    }
+  }, [isMouseMoving]);
+
+  const togglePlay = () => {
+    if (!music) return;
+    music.setIsPlaying(!music.isPlaying);
+  };
+
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (e.code === "Space" && e.target === document.body) {
+        e.preventDefault();
+        togglePlay();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyPress);
+    return () => document.removeEventListener("keydown", handleKeyPress);
+  }, [music?.isPlaying]);
+
+  const formatTime = (seconds?: any) => {
+    if (!seconds || isNaN(seconds)) return "00:00";
+    const minutes = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${minutes.toString().padStart(2, "0")}:${secs
+      .toString()
+      .padStart(2, "0")}`;
+  };
+
+  useEffect(() => {
+    if (expanded && containerRef.current) {
+      containerRef.current.requestFullscreen().catch((err) => {
+        console.warn("Fullscreen failed:", err);
+      });
+    }
+  }, [expanded]);
+
+  const exitFullscreen = () => {
+    if (document.fullscreenElement) {
+      document.exitFullscreen();
+    }
+  };
+
+  const audioElement = (
+    <audio
+      ref={audioRef}
+      src={music?.currentSong?.url || ""}
+      preload="metadata"
+      controls={false}
+      onEnded={() => {
+        music?.setIsPlaying(false);
+        music?.playNext?.();
+      }}
+      onTimeUpdate={() =>
+        music?.setProgress(audioRef.current?.currentTime || 0)
+      }
+    />
+  );
+
+  if (!music?.currentSong) return null;
+
+  if (!expanded) {
+    return (
+      <>
+        {audioElement}
+        <div className="fixed bottom-0 w-full py-3 bg-black backdrop-blur-2xl rounded-t-xl z-50">
+          <div className="grid grid-cols-3 items-center px-6 gap-4">
+            <div className="flex items-center gap-3">
+              <Image
+                src={songImg}
+                width={50}
+                height={50}
+                alt="mini cover"
+                className="rounded-md shadow-md"
+              />
+              <div className="flex flex-col">
+                <h1 className="font-semibold text-white text-sm truncate max-w-[200px]">
+                  {music?.currentSong?.title || "Unknown Title"}
+                </h1>
+                <Link
+                  href={{
+                    pathname: `/artist/${encodeURIComponent(
+                      music?.currentSong?.artist
+                        ? music.currentSong.artist
+                        : "unknown"
+                    )}`,
+                    query: {
+                      id: music?.currentSong?.artistId
+                        ? music.currentSong.artistId
+                        : "741999",
+                    },
+                  }}
+                >
+                  <p className="text-gray-300 text-xs hover:cursor-pointer hover:underline">
+                    {music?.currentSong?.artist || "Unknown Artist"}
+                  </p>
+                </Link>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-3">
+              <div className="flex flex-row gap-6 items-center justify-center">
+                <FaShuffle
+                  size={15}
+                  className={`cursor-pointer transition-transform hover:scale-110 ${
+                    music?.shuffleActive
+                      ? "bg-white text-black p-0.5 rounded-full size-4"
+                      : "text-white/80"
+                  }`}
+                  onClick={music?.toggleShuffle}
+                />
+                <FaBackwardStep
+                  onClick={music?.playPrev}
+                  size={20}
+                  className={`text-white/80  ${
+                    music?.currentIdx && music?.currentIdx > 0
+                      ? "cursor-pointer hover:text-white transition-transform hover:scale-110"
+                      : "cursor-not-allowed"
+                  }`}
+                />
+                {music?.isPlaying ? (
+                  <FaPauseCircle
+                    onClick={togglePlay}
+                    size={35}
+                    className="text-white bg-black rounded-full shadow-lg hover:scale-105 transition-transform cursor-pointer p-0.5"
+                  />
+                ) : (
+                  <FaPlayCircle
+                    onClick={togglePlay}
+                    size={35}
+                    className="text-white bg-black rounded-full shadow-lg hover:scale-105 transition-transform cursor-pointer p-0.5"
+                  />
+                )}
+
+                <FaForwardStep
+                  onClick={music?.playNext}
+                  size={20}
+                  className={`text-white/80  ${
+                    music?.queue.length &&
+                    music.currentIdx == music?.queue.length - 1
+                      ? "cursor-not-allowed"
+                      : "cursor-pointer hover:text-white transition-transform hover:scale-110"
+                  }`}
+                />
+                <MdOutlineLoop
+                  size={20}
+                  className="text-white/80 cursor-pointer transition-transform hover:scale-110"
+                />
+              </div>
+              <div className="w-full flex flex-row gap-3 items-center justify-center">
+                <p className="text-sm font-light text-white">
+                  {formatTime(music?.progress)}
+                </p>
+
+                <input
+                  type="range"
+                  min={0}
+                  max={music?.currentSong?.duration ?? 0}
+                  step={1}
+                  value={isSeeking ? seekValue : music?.progress ?? 0}
+                  className="slider"
+                  style={
+                    {
+                      ["--progress" as any]: `${
+                        music?.currentSong?.duration
+                          ? ((isSeeking ? seekValue : music?.progress ?? 0) /
+                              music?.currentSong?.duration) *
+                            100
+                          : 0
+                      }%`,
+                    } as React.CSSProperties
+                  }
+                  onChange={(e) => {
+                    const val = Number(e.target.value);
+                    setSeekValue(val);
+                    setIsSeeking(true);
+                  }}
+                  onMouseUp={(e) => {
+                    const newTime = Number(
+                      (e.target as HTMLInputElement).value
+                    );
+                    if (audioRef.current) {
+                      audioRef.current.currentTime = newTime;
+                    }
+                    music?.setProgress?.(newTime);
+                    setIsSeeking(false);
+                  }}
+                />
+                <p className="text-sm font-light text-white">
+                  {formatTime(music?.currentSong?.duration)}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-4">
+              <MdFullscreen
+                size={24}
+                onClick={() => {
+                  setExpanded(true);
+                }}
+                className="cursor-pointer hover:scale-110 transition-transform text-white"
+              />
+              <div className="text-white/60 text-lg hover:text-white cursor-pointer">
+                •••
+              </div>
+            </div>
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  return (
+    <>
+      {audioElement}
+      <div
+        className="fixed inset-0 z-[100] flex flex-col items-center justify-center "
+        ref={containerRef}
+        style={{
+          background: bgGradient,
+        }}
+      >
+        <button
+          onClick={() => {
+            setExpanded(false);
+            exitFullscreen();
+          }}
+          className="absolute top-4 right-4 text-white text-lg bg-black/40 px-3 py-1 rounded-lg hover:bg-black/60 transition-colors cursor-pointer z-10"
+        >
+          ✕
+        </button>
+
+        <div className="flex items-center justify-center shadow-2xl mb-8">
+          <Image
+            src={songImg}
+            alt={"songimage"}
+            width={450}
+            height={450}
+            className="rounded-2xl shadow-xl object-cover"
+          />
+        </div>
+
+        <div
+          ref={controlsRef}
+          className={`absolute bottom-0 w-full py-4 bg-black/95 backdrop-blur-2xl rounded-t-xl cursor-auto`}
+        >
+          <div className="grid grid-cols-3 items-center px-6 gap-4">
+            <div className="flex items-center gap-3">
+              <Image
+                src={songImg}
+                width={50}
+                height={50}
+                alt="mini cover"
+                className="rounded-md shadow-md"
+              />
+              <div className="flex flex-col">
+                <h1 className="font-semibold text-white text-sm truncate max-w-[200px]">
+                  {music?.currentSong?.title || "Unknown Title"}
+                </h1>
+                <Link
+                  href={{
+                    pathname: `/artist/${encodeURIComponent(
+                      music?.currentSong?.artist
+                        ? music.currentSong.artist
+                        : "unknown"
+                    )}`,
+                    query: {
+                      id: music?.currentSong?.artistId
+                        ? music.currentSong.artistId
+                        : "741999",
+                    },
+                  }}
+                >
+                  <p
+                    className="text-gray-300 text-xs hover:cursor-pointer hover:underline"
+                    onClick={() => {
+                      setExpanded(false);
+                      exitFullscreen();
+                    }}
+                  >
+                    {music?.currentSong?.artist || "Unknown Artist"}
+                  </p>
+                </Link>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-3">
+              <div className="flex flex-row gap-6 items-center justify-center">
+                <FaShuffle
+                  size={15}
+                  className={`cursor-pointer transition-transform hover:scale-110 ${
+                    music?.shuffleActive
+                      ? "bg-white text-black p-0.5 rounded-full size-4"
+                      : "text-white/80"
+                  }`}
+                  onClick={music?.toggleShuffle}
+                />
+                <FaBackwardStep
+                  onClick={music?.playPrev}
+                  size={20}
+                  className={`text-white/80  ${
+                    music?.currentIdx && music?.currentIdx > 0
+                      ? "cursor-pointer hover:text-white transition-transform hover:scale-110"
+                      : "cursor-not-allowed"
+                  }`}
+                />
+                {music?.isPlaying ? (
+                  <FaPauseCircle
+                    onClick={togglePlay}
+                    size={35}
+                    className="text-white bg-black rounded-full shadow-lg hover:scale-105 transition-transform cursor-pointer p-0.5"
+                  />
+                ) : (
+                  <FaPlayCircle
+                    onClick={togglePlay}
+                    size={35}
+                    className="text-white bg-black rounded-full shadow-lg hover:scale-105 transition-transform cursor-pointer p-0.5"
+                  />
+                )}
+
+                <FaForwardStep
+                  onClick={music?.playNext}
+                  size={20}
+                  className={`text-white/80  ${
+                    music?.queue.length &&
+                    music.currentIdx == music?.queue.length - 1
+                      ? "cursor-not-allowed"
+                      : "cursor-pointer hover:text-white transition-transform hover:scale-110"
+                  }`}
+                />
+                <MdOutlineLoop
+                  size={20}
+                  className="text-white/80 cursor-pointer transition-transform hover:scale-110"
+                />
+              </div>
+              <div className="w-full flex flex-row gap-3 items-center justify-center">
+                <p className="text-sm font-light text-white">
+                  {formatTime(music?.progress)}
+                </p>
+
+                <input
+                  type="range"
+                  min={0}
+                  max={music?.currentSong?.duration ?? 0}
+                  step={1}
+                  value={isSeeking ? seekValue : music?.progress ?? 0}
+                  className="slider"
+                  style={
+                    {
+                      ["--progress" as any]: `${
+                        music?.currentSong?.duration
+                          ? ((isSeeking ? seekValue : music?.progress ?? 0) /
+                              music?.currentSong?.duration) *
+                            100
+                          : 0
+                      }%`,
+                    } as React.CSSProperties
+                  }
+                  onChange={(e) => {
+                    const val = Number(e.target.value);
+                    setSeekValue(val);
+                    setIsSeeking(true);
+                  }}
+                  onMouseUp={(e) => {
+                    const newTime = Number(
+                      (e.target as HTMLInputElement).value
+                    );
+                    if (audioRef.current) {
+                      audioRef.current.currentTime = newTime;
+                    }
+                    music?.setProgress?.(newTime);
+                    setIsSeeking(false);
+                  }}
+                />
+                <p className="text-sm font-light text-white">
+                  {formatTime(music?.currentSong?.duration)}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end text-white/60 text-lg hover:text-white cursor-pointer">
+              •••
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+};
+
+export default PlayerCover;

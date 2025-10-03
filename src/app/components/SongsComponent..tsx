@@ -3,6 +3,9 @@ import React from "react";
 import Image from "next/image";
 import defaultImg from "../../../public/default.png";
 import Link from "next/link";
+import { useContext, useState } from "react";
+import { MusicContext } from "@/context/MusicContextProvider";
+import { getSongSuggestions } from "@/lib/api";
 const SongsComponent = ({
   playlistData,
   type,
@@ -22,6 +25,12 @@ const SongsComponent = ({
     const formattedCount = new Intl.NumberFormat("en-US").format(count);
     return formattedCount;
   };
+  const songContext = useContext(MusicContext);
+  if (!songContext) {
+    throw new Error("MusicContext must be used within MusicContextProvider");
+  }
+  const { playSong } = songContext;
+
   return (
     <div className="w-full min-h-screen flex flex-col">
       {type == "songs" || type == "albums" ? (
@@ -46,15 +55,58 @@ const SongsComponent = ({
                   </div>
 
                   <div className="flex flex-col">
-                    <Link
-                      href={{
-                        pathname: `/album/${type != "songs" && playlists.id}`,
-                      }}
-                    >
-                      <h1 className="text-xl text-white font-sans font-medium cursor-pointer">
+                    {type !== "albums" ? (
+                      <h1
+                        className="text-xl text-white font-sans font-medium cursor-pointer"
+                        onClick={async () => {
+                          try {
+                            const response = await getSongSuggestions(
+                              playlists.id
+                            );
+                            playSong(
+                              {
+                                url: playlists.downloadUrl[3]?.url,
+                                title: cleanSongName(playlists.name),
+                                artist:
+                                  playlists.artists.primary[0]?.name ||
+                                  "Unknown",
+                                img:
+                                  playlists.image[2]?.url ||
+                                  playlists.image[1]?.url ||
+                                  defaultImg.src,
+                                duration: playlists.duration,
+                                artistId: playlists.artists.primary[0].id,
+                                currentIdx: idx,
+                              },
+                              response.map((p: any, i: number) => ({
+                                url: p.downloadUrl[3]?.url,
+                                title: cleanSongName(p.name),
+                                artist: p.artists.primary[0]?.name || "Unknown",
+                                img:
+                                  p.image[2]?.url ||
+                                  p.image[1]?.url ||
+                                  defaultImg.src,
+                                duration: p.duration,
+                                artistId: p.artists.primary[0].id,
+                                currentIdx: i,
+                              })),
+                              idx
+                            );
+                          } catch (e) {
+                            console.log(e, "error occured while suggestions");
+                          }
+                        }}
+                      >
                         {cleanSongName(playlists.name)}
                       </h1>
-                    </Link>
+                    ) : (
+                      <Link href={`/album/${playlists.id}`}>
+                        <h1 className="text-xl text-white font-sans font-medium cursor-pointer hover:underline">
+                          {cleanSongName(playlists.name)}
+                        </h1>
+                      </Link>
+                    )}
+
                     <Link
                       href={{
                         pathname: `/artist/${encodeURIComponent(
