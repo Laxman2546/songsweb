@@ -19,6 +19,8 @@ const PlayerCover = () => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const controlsRef = useRef<HTMLDivElement>(null);
+  const textRef = useRef<HTMLDivElement>(null);
+  const closeRef = useRef<HTMLButtonElement>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [isMouseMoving, setIsMouseMoving] = useState<boolean>(false);
   const [bgGradient, setBgGradient] = useState<string>(
@@ -31,7 +33,7 @@ const PlayerCover = () => {
     clearTimeout(timeoutRef.current as NodeJS.Timeout);
     timeoutRef.current = setTimeout(() => {
       setIsMouseMoving(false);
-    }, 5000);
+    }, 3000);
   };
   useEffect(() => {
     window.addEventListener("mousemove", handleMouseMove);
@@ -79,6 +81,13 @@ const PlayerCover = () => {
         ease: "power2.out",
         display: "block",
       });
+      gsap.to(closeRef.current, {
+        opacity: 1,
+        y: 0,
+        duration: 0.5,
+        ease: "power2.out",
+        display: "block",
+      });
     } else {
       gsap.to(controlsRef.current, {
         opacity: 0,
@@ -88,6 +97,68 @@ const PlayerCover = () => {
         onComplete: () => {
           if (controlsRef.current) {
             gsap.set(controlsRef.current, { display: "none" });
+          }
+        },
+      });
+      gsap.to(closeRef.current, {
+        opacity: 0,
+        y: -50,
+        duration: 0.5,
+        ease: "power2.in",
+        onComplete: () => {
+          if (closeRef.current) {
+            gsap.set(closeRef.current, { display: "none" });
+          }
+        },
+      });
+    }
+  }, [isMouseMoving]);
+
+  useEffect(() => {
+    if (!closeRef.current) return;
+
+    if (isMouseMoving) {
+      gsap.to(closeRef.current, {
+        opacity: 1,
+        y: 0,
+        duration: 0.5,
+        ease: "power2.out",
+        display: "block",
+      });
+    } else {
+      gsap.to(closeRef.current, {
+        opacity: 0,
+        y: -50,
+        duration: 0.5,
+        ease: "power2.in",
+        onComplete: () => {
+          if (closeRef.current) {
+            gsap.set(closeRef.current, { display: "none" });
+          }
+        },
+      });
+    }
+  }, [isMouseMoving]);
+  useEffect(() => {
+    if (!textRef.current) return;
+
+    if (!isMouseMoving) {
+      gsap.to(textRef.current, {
+        opacity: 1,
+        y: -30,
+        duration: 0.5,
+        ease: "power2.in",
+        display: "block",
+      });
+    } else {
+      gsap.to(textRef.current, {
+        opacity: 0,
+        y: 0,
+        duration: 0.5,
+        ease: "power2.out",
+        onComplete: () => {
+          if (textRef.current) {
+            gsap.set(textRef.current, { display: "none" });
           }
         },
       });
@@ -314,6 +385,7 @@ const PlayerCover = () => {
         }}
       >
         <button
+          ref={closeRef}
           onClick={() => {
             setExpanded(false);
             exitFullscreen();
@@ -327,15 +399,25 @@ const PlayerCover = () => {
           <Image
             src={songImg}
             alt={"songimage"}
-            width={450}
-            height={450}
+            width={550}
+            height={550}
             className="rounded-2xl shadow-xl object-cover"
           />
         </div>
-
+        <div
+          className="absolute bottom-0 w-full py-8 px-5 flex flex-col"
+          ref={textRef}
+        >
+          <h1 className="text-2xl font-bold text-white">
+            {music.currentSong.title}
+          </h1>
+          <h1 className="text-xl font-semibold text-gray-100">
+            {music.currentSong.artist}
+          </h1>
+        </div>
         <div
           ref={controlsRef}
-          className={`absolute bottom-0 w-full py-4 bg-black/95 backdrop-blur-2xl rounded-t-xl cursor-auto`}
+          className={`hidden absolute bottom-0 w-full py-4 bg-black/95 backdrop-blur-2xl rounded-t-xl cursor-auto`}
         >
           <div className="grid grid-cols-3 items-center px-6 gap-4">
             <div className="flex items-center gap-3">
