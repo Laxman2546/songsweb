@@ -81,11 +81,13 @@ export default function Navbar() {
                 <Bell size={24} />
               </div>
             </abbr>
-            <div className="cursor-pointer hover:scale-110">
-              <abbr title="liked songs">
-                <HeartIcon size={24} />
-              </abbr>
-            </div>
+            <Link href={"/likedsongs"}>
+              <div className="cursor-pointer hover:scale-110">
+                <abbr title="liked songs">
+                  <HeartIcon size={24} />
+                </abbr>
+              </div>
+            </Link>
 
             <div className="cursor-pointer hover:scale-110">
               <abbr title="Account">

@@ -5,10 +5,16 @@ import { MusicContext } from "@/context/MusicContextProvider";
 import defaultImg from "@/../public/default.png";
 import { Vibrant } from "node-vibrant/browser";
 import { FaPlayCircle, FaPauseCircle } from "react-icons/fa";
-import { FaBackwardStep, FaForwardStep, FaShuffle } from "react-icons/fa6";
+import {
+  FaBackwardStep,
+  FaForwardStep,
+  FaShuffle,
+  FaHeart,
+} from "react-icons/fa6";
 import { MdOutlineLoop } from "react-icons/md";
 import Link from "next/link";
 import gsap from "gsap";
+import { FaRegHeart } from "react-icons/fa";
 import { MdFullscreen } from "react-icons/md";
 
 const PlayerCover = () => {
@@ -22,6 +28,7 @@ const PlayerCover = () => {
   const textRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [isLiked, setIsLiked] = useState(false);
   const [isMouseMoving, setIsMouseMoving] = useState<boolean>(false);
   const [bgGradient, setBgGradient] = useState<string>(
     "linear-gradient(to bottom, #000, #111)"
@@ -71,17 +78,18 @@ const PlayerCover = () => {
   }, [music?.isPlaying, music?.currentSong]);
 
   useEffect(() => {
+    if (!containerRef.current) return;
+    if (!isMouseMoving) {
+      containerRef.current.style.cursor = "none";
+    } else {
+      containerRef.current.style.cursor = "default";
+    }
+  }, [isMouseMoving]);
+  useEffect(() => {
     if (!controlsRef.current) return;
 
     if (isMouseMoving) {
       gsap.to(controlsRef.current, {
-        opacity: 1,
-        y: 0,
-        duration: 0.5,
-        ease: "power2.out",
-        display: "block",
-      });
-      gsap.to(closeRef.current, {
         opacity: 1,
         y: 0,
         duration: 0.5,
@@ -97,17 +105,6 @@ const PlayerCover = () => {
         onComplete: () => {
           if (controlsRef.current) {
             gsap.set(controlsRef.current, { display: "none" });
-          }
-        },
-      });
-      gsap.to(closeRef.current, {
-        opacity: 0,
-        y: -50,
-        duration: 0.5,
-        ease: "power2.in",
-        onComplete: () => {
-          if (closeRef.current) {
-            gsap.set(closeRef.current, { display: "none" });
           }
         },
       });
@@ -189,6 +186,59 @@ const PlayerCover = () => {
     return `${minutes.toString().padStart(2, "0")}:${secs
       .toString()
       .padStart(2, "0")}`;
+  };
+  const handleLike = (song: any) => {
+    const storage = localStorage.getItem("likedsongs");
+    if (!storage) {
+      localStorage.setItem("likedsongs", JSON.stringify([song]));
+      setIsLiked(true);
+    } else {
+      const likedSongs = JSON.parse(storage);
+      const alreadyLiked = likedSongs.some((s: any) => s.url == song.url);
+      if (alreadyLiked) {
+        setIsLiked(true);
+      } else {
+        const setLike = localStorage.setItem(
+          "likedsongs",
+          JSON.stringify([...likedSongs, song])
+        );
+      }
+    }
+  };
+  const checkIsLiked = () => {
+    console.log("iam checking");
+    const storage = localStorage.getItem("likedsongs");
+    if (!storage) {
+      return;
+    } else {
+      const likedSongs = JSON.parse(storage);
+      const alreadyLiked = likedSongs.some(
+        (s: any) => s.url == music?.currentSong?.url
+      );
+      if (alreadyLiked) {
+        setIsLiked(true);
+      } else {
+        setIsLiked(false);
+      }
+    }
+  };
+
+  useEffect(() => {
+    checkIsLiked();
+  }, [music?.currentSong]);
+  const handleDislike = (song: any) => {
+    const storage = localStorage.getItem("likedsongs");
+    if (!storage) return;
+
+    try {
+      const likedSongs = JSON.parse(storage);
+      const updatedSongs = likedSongs.filter((s: any) => s.url !== song.url);
+
+      localStorage.setItem("likedsongs", JSON.stringify(updatedSongs));
+      setIsLiked(false);
+    } catch (err) {
+      console.error("Error removing song from liked list:", err);
+    }
   };
 
   useEffect(() => {
@@ -310,6 +360,19 @@ const PlayerCover = () => {
                   size={20}
                   className="text-white/80 cursor-pointer transition-transform hover:scale-110"
                 />
+                {isLiked ? (
+                  <FaHeart
+                    size={20}
+                    onClick={() => handleDislike(music.currentSong)}
+                    className="text-white/80 cursor-pointer transition-transform hover:scale-110 border-1 border-black"
+                  />
+                ) : (
+                  <FaRegHeart
+                    size={20}
+                    onClick={() => handleLike(music.currentSong)}
+                    className="text-white/80 cursor-pointer transition-transform hover:scale-110"
+                  />
+                )}
               </div>
               <div className="w-full flex flex-row gap-3 items-center justify-center">
                 <p className="text-sm font-light text-white">
@@ -408,16 +471,22 @@ const PlayerCover = () => {
           className="absolute bottom-0 w-full py-8 px-5 flex flex-col"
           ref={textRef}
         >
-          <h1 className="text-2xl font-bold text-white">
+          <h1
+            className="text-2xl font-bold text-white drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,0.8)]
+"
+          >
             {music.currentSong.title}
           </h1>
-          <h1 className="text-xl font-semibold text-gray-100">
+          <h1
+            className="text-xl font-semibold text-gray-100 drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,0.8)]
+"
+          >
             {music.currentSong.artist}
           </h1>
         </div>
         <div
           ref={controlsRef}
-          className={`hidden absolute bottom-0 w-full py-4 bg-black/95 backdrop-blur-2xl rounded-t-xl cursor-auto`}
+          className={`absolute bottom-0 w-full py-4 bg-black/95 backdrop-blur-2xl rounded-t-xl cursor-auto`}
         >
           <div className="grid grid-cols-3 items-center px-6 gap-4">
             <div className="flex items-center gap-3">
@@ -507,6 +576,19 @@ const PlayerCover = () => {
                   size={20}
                   className="text-white/80 cursor-pointer transition-transform hover:scale-110"
                 />
+                {isLiked ? (
+                  <FaHeart
+                    size={20}
+                    onClick={() => handleDislike(music.currentSong)}
+                    className="text-white/80 cursor-pointer transition-transform hover:scale-110 border-1 border-black"
+                  />
+                ) : (
+                  <FaRegHeart
+                    size={20}
+                    onClick={() => handleLike(music.currentSong)}
+                    className="text-white/80 cursor-pointer transition-transform hover:scale-110"
+                  />
+                )}
               </div>
               <div className="w-full flex flex-row gap-3 items-center justify-center">
                 <p className="text-sm font-light text-white">
