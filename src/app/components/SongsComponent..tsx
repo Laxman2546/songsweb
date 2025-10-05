@@ -32,159 +32,152 @@ const SongsComponent = ({
   const { playSong } = songContext;
 
   return (
-    <div className="w-full min-h-screen flex flex-col">
-      {type == "songs" || type == "albums" ? (
-        <div className="w-full flex flex-col gap-5">
+    <div className="w-full min-h-screen flex flex-col px-3 sm:px-6 md:px-10 py-4">
+      {type === "songs" || type === "albums" ? (
+        <div className="w-full flex flex-col gap-3 sm:gap-5">
           {playlistData?.map((playlists: any, idx: number) => (
-            <div key={idx}>
-              <div className="max-w-full flex flex-row items-center justify-between p-2 pr-24 hover:bg-gray-500 rounded-xl">
-                <div className="flex flex-row items-center gap-6">
-                  <div className="flex flex-row items-center gap-3">
-                    <h1 className="text-md w-8 text-right">{idx + 1}</h1>
-                    <Image
-                      src={
-                        playlists.image[1].url
-                          ? playlists.image[1].url
-                          : defaultImg
-                      }
-                      width={50}
-                      height={50}
-                      className="rounded-sm"
-                      alt="songimage"
-                    />
-                  </div>
+            <div
+              key={idx}
+              className="flex flex-row items-center justify-between p-2 sm:p-3 rounded-xl hover:bg-gray-600/50 transition-all duration-200"
+            >
+              <div className="flex flex-row items-center gap-3 sm:gap-6 w-3/4 sm:w-2/3">
+                <p className="hidden sm:block text-gray-400 w-6 text-sm sm:text-base">
+                  {idx + 1}
+                </p>
 
-                  <div className="flex flex-col">
-                    {type !== "albums" ? (
-                      <h1
-                        className="text-xl text-white font-sans font-medium cursor-pointer"
-                        onClick={async () => {
-                          try {
-                            const response = await getSongSuggestions(
-                              playlists.id
-                            );
-                            playSong(
-                              {
-                                url: playlists.downloadUrl[3]?.url,
-                                title: cleanSongName(playlists.name),
-                                artist:
-                                  playlists.artists.primary[0]?.name ||
-                                  "Unknown",
-                                img:
-                                  playlists.image[2]?.url ||
-                                  playlists.image[1]?.url ||
-                                  defaultImg.src,
-                                duration: playlists.duration,
-                                artistId: playlists.artists.primary[0].id,
-                                currentIdx: idx,
-                              },
-                              response.map((p: any, i: number) => ({
-                                url: p.downloadUrl[3]?.url,
-                                title: cleanSongName(p.name),
-                                artist: p.artists.primary[0]?.name || "Unknown",
-                                img:
-                                  p.image[2]?.url ||
-                                  p.image[1]?.url ||
-                                  defaultImg.src,
-                                duration: p.duration,
-                                artistId: p.artists.primary[0].id,
-                                currentIdx: i,
-                              })),
-                              idx
-                            );
-                          } catch (e) {
-                            console.log(e, "error occured while suggestions");
-                          }
-                        }}
-                      >
-                        {cleanSongName(playlists.name)}
-                      </h1>
-                    ) : (
-                      <Link href={`/album/${playlists.id}`}>
-                        <h1 className="text-xl text-white font-sans font-medium cursor-pointer hover:underline">
-                          {cleanSongName(playlists.name)}
-                        </h1>
-                      </Link>
-                    )}
+                <Image
+                  src={
+                    playlists.image?.[1]?.url
+                      ? playlists.image[1].url
+                      : defaultImg
+                  }
+                  width={50}
+                  height={50}
+                  className="rounded-md object-cover"
+                  alt="song image"
+                />
 
-                    <Link
-                      href={{
-                        pathname: `/artist/${encodeURIComponent(
-                          playlists.artists.primary[0]
-                            ? playlists.artists.primary[0].name
-                            : "unknown"
-                        )}`,
-                        query: {
-                          id: playlists.artists.primary[0]
-                            ? playlists.artists.primary[0].id
-                            : "741999",
-                        },
+                <div className="flex flex-col overflow-hidden whitespace-nowrap">
+                  {type !== "albums" ? (
+                    <h1
+                      className="text-white font-medium text-sm sm:text-lg cursor-pointer hover:underline truncate"
+                      onClick={async () => {
+                        try {
+                          const response = await getSongSuggestions(
+                            playlists.id
+                          );
+                          playSong(
+                            {
+                              url: playlists.downloadUrl[3]?.url,
+                              title: cleanSongName(playlists.name),
+                              artist:
+                                playlists.artists.primary[0]?.name || "Unknown",
+                              img:
+                                playlists.image[2]?.url ||
+                                playlists.image[1]?.url ||
+                                defaultImg.src,
+                              duration: playlists.duration,
+                              artistId: playlists.artists.primary[0]?.id,
+                              currentIdx: idx,
+                            },
+                            response.map((p: any, i: number) => ({
+                              url: p.downloadUrl[3]?.url,
+                              title: cleanSongName(p.name),
+                              artist: p.artists.primary[0]?.name || "Unknown",
+                              img:
+                                p.image[2]?.url ||
+                                p.image[1]?.url ||
+                                defaultImg.src,
+                              duration: p.duration,
+                              artistId: p.artists.primary[0]?.id,
+                              currentIdx: i,
+                            })),
+                            idx
+                          );
+                        } catch (e) {
+                          console.log(e, "error occurred while suggestions");
+                        }
                       }}
                     >
-                      <p className="text-md text-white cursor-pointer hover:underline">
-                        {playlists.artists.primary[0]
-                          ? playlists.artists.primary[0].name
-                          : "unknown"}
-                      </p>
+                      {cleanSongName(playlists.name)}
+                    </h1>
+                  ) : (
+                    <Link href={`/album/${playlists.id}`}>
+                      <h1 className="text-white font-medium text-sm sm:text-lg cursor-pointer hover:underline truncate">
+                        {cleanSongName(playlists.name)}
+                      </h1>
                     </Link>
-                  </div>
-                </div>
-                <div className="flex flex-row items-center gap-8 text-white">
-                  {type == "songs" && (
-                    <p className="w-20 text-right">
-                      {countData(playlists.playCount)}
-                    </p>
                   )}
+
                   <Link
                     href={{
-                      pathname: `/album/${
-                        type == "songs" ? playlists.album.id : playlists.id
-                      }`,
+                      pathname: `/artist/${encodeURIComponent(
+                        playlists.artists.primary[0]?.name || "unknown"
+                      )}`,
+                      query: {
+                        id: playlists.artists.primary[0]?.id || "741999",
+                      },
                     }}
                   >
-                    <p className="w-40 truncate cursor-pointer hover:underline">
-                      {cleanSongName(
-                        type == "songs" ? playlists.album.name : playlists.name
-                      )}
+                    <p className="text-gray-300 text-xs sm:text-sm hover:underline truncate">
+                      {playlists.artists.primary[0]?.name || "unknown"}
                     </p>
                   </Link>
-                  {type == "songs" && (
-                    <p className="w-16 text-right">
-                      {durationMin(playlists.duration)}
-                    </p>
-                  )}
                 </div>
+              </div>
+
+              <div className="flex flex-row items-center gap-4 sm:gap-6 text-gray-300 text-xs sm:text-base">
+                {type === "songs" && (
+                  <p className="hidden sm:block w-20 text-right">
+                    {countData(playlists.playCount)}
+                  </p>
+                )}
+                <Link
+                  href={{
+                    pathname: `/album/${
+                      type === "songs" ? playlists.album.id : playlists.id
+                    }`,
+                  }}
+                >
+                  <p className="hidden sm:block sm:w-40 truncate hover:underline">
+                    {cleanSongName(
+                      type === "songs" ? playlists.album.name : playlists.name
+                    )}
+                  </p>
+                </Link>
+                {type === "songs" && (
+                  <p className="text-right">
+                    {durationMin(playlists.duration)}
+                  </p>
+                )}
               </div>
             </div>
           ))}
         </div>
       ) : (
-        <div className="w-full grid grid-cols-2 md:grid-cols-6  lg:grid-cols-7 gap-5">
+        <div className="w-full grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6 gap-4 sm:gap-6">
           {playlistData?.map((playlists: any, idx: number) => (
             <Link
               key={idx}
               href={{
                 pathname:
-                  type == "artists"
+                  type === "artists"
                     ? `/artist/${encodeURIComponent(
-                        playlists.name ? playlists.name : "unknown"
+                        playlists.name || "unknown"
                       )}`
                     : `/player/${playlists.id}`,
                 query: {
                   id:
-                    type == "artists"
-                      ? playlists.id
-                        ? playlists.id
-                        : "741999"
+                    type === "artists"
+                      ? playlists.id || "741999"
                       : playlists.id,
                   img: playlists.image?.[2]?.url || playlists.image?.[0]?.url,
                 },
               }}
             >
               <div
-                className="flex flex-col items-center gap-3 cursor-pointer 
-                rounded-2xl
-                   hover:scale-105 transition-all duration-300 shadow-md"
+                className="flex flex-col items-center gap-2 sm:gap-3 cursor-pointer rounded-2xl 
+            hover:scale-105 transition-all duration-300 shadow-md bg-gray-800/40 p-3 sm:p-4"
               >
                 <img
                   src={
@@ -197,15 +190,14 @@ const SongsComponent = ({
                   onError={(e) => (e.currentTarget.src = defaultImg.src)}
                   alt="image"
                   className={`object-cover shadow-lg ${
-                    type == "artists" ? "rounded-full" : "rounded-xl"
+                    type === "artists" ? "rounded-full" : "rounded-xl"
                   }`}
                 />
-                <p className="max-w-[80px] md:max-w-[150px] text-center text-white text-sm md:text-base font-medium truncate">
+                <p className="max-w-[90px] sm:max-w-[140px] text-center text-white text-xs sm:text-sm font-medium truncate">
                   {playlists.name}
                 </p>
               </div>
             </Link>
-            
           ))}
         </div>
       )}

@@ -713,6 +713,17 @@ const PlayerCover = () => {
 
               <div className="flex items-center justify-end gap-3 md:gap-4">
                 <div className="md:hidden">
+                  <FaBackwardStep
+                    onClick={music?.playPrev}
+                    size={20}
+                    className={`text-white/80  ${
+                      music?.currentIdx && music?.currentIdx > 0
+                        ? "cursor-pointer hover:text-white transition-transform hover:scale-110"
+                        : "cursor-not-allowed"
+                    }`}
+                  />
+                </div>
+                <div className="md:hidden">
                   {music?.isPlaying ? (
                     <FaPauseCircle
                       onClick={togglePlay}
@@ -727,7 +738,18 @@ const PlayerCover = () => {
                     />
                   )}
                 </div>
-
+                <div className="md:hidden">
+                  <FaForwardStep
+                    onClick={music?.playNext}
+                    size={20}
+                    className={`text-white/80  ${
+                      music?.queue.length &&
+                      music.currentIdx == music?.queue.length - 1
+                        ? "cursor-not-allowed"
+                        : "cursor-pointer hover:text-white transition-transform hover:scale-110"
+                    }`}
+                  />
+                </div>
                 <div className="md:hidden">
                   {isLiked ? (
                     <FaHeart
@@ -744,13 +766,6 @@ const PlayerCover = () => {
                   )}
                 </div>
 
-                <MdFullscreen
-                  size={24}
-                  onClick={() => {
-                    setExpanded(true);
-                  }}
-                  className="cursor-pointer hover:scale-110 transition-transform text-white"
-                />
                 <div className="hidden sm:block text-white/60 text-lg hover:text-white cursor-pointer">
                   •••
                 </div>

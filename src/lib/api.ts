@@ -16,13 +16,25 @@ interface SongUrlResponse {
 }
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
-
 export const getTrendingSongs = async () => {
   try {
-    const { data } = await axios.get<TrendingSongsResponse>(
-      `${API_BASE_URL}/search/playlists?query=telugu&page=1&limit=1000`
-    );
-    return data.data.results;
+    const requests = [
+      axios.get(
+        `${API_BASE_URL}/search/playlists?query=telugu&page=1&limit=1000`
+      ),
+      axios.get(
+        `${API_BASE_URL}/search/playlists?query=hindi&page=1&limit=1000`
+      ),
+      axios.get(
+        `${API_BASE_URL}/search/playlists?query=english&page=1&limit=1000`
+      ),
+    ];
+
+ 
+    const responses = await Promise.all(requests);
+    const allResults = responses.flatMap((res) => res.data.data.results);
+
+    return allResults;
   } catch (e) {
     console.error("Something went wrong while fetching trending songs:", e);
     throw e;

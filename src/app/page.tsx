@@ -34,31 +34,39 @@ export default function home() {
             <Loader />
           </div>
         ) : (
-          <div className="w-full grid grid-cols-3 md:grid-cols-5 lg:grid-cols-7  gap-5 items-center justify-center pl-8">
-            {songsData.map((playlists, idx) => (
-              <Link
-                href={{
-                  pathname: `/player/${playlists.id}`,
-                  query: {
-                    img: playlists.image[2].url || playlists.image[0].url,
-                  },
-                }}
-                key={idx}
-              >
-                <div className="flex flex-col gap-2 cursor-pointer">
-                  <Image
-                    src={playlists.image[2].url || playlists.image[0].url}
-                    alt="song image"
-                    width={280}
-                    height={160}
-                    className="rounded-xl"
-                  />
-                  <p className="text-white max-w-80 text-center">
-                    {playlists.name}
-                  </p>
-                </div>
-              </Link>
-            ))}
+          <div className="w-full flex flex-col gap-3 pl-8">
+            <div className="flex flex-col">
+              <span className="text-xs font-medium text-gray-400">
+                Made for you
+              </span>
+              <h1 className="text-2xl font-bold">Playlists</h1>
+              <div className="w-full grid grid-cols-3 md:grid-cols-5 lg:grid-cols-7  gap-5 items-center justify-center">
+                {songsData.map((playlists, idx) => (
+                  <Link
+                    href={{
+                      pathname: `/player/${playlists.id}`,
+                      query: {
+                        img: playlists.image[2].url || playlists.image[0].url,
+                      },
+                    }}
+                    key={idx}
+                  >
+                    <div className="flex flex-col gap-2 cursor-pointer">
+                      <Image
+                        src={playlists.image[2].url || playlists.image[0].url}
+                        alt="song image"
+                        width={280}
+                        height={160}
+                        className="rounded-xl"
+                      />
+                      <p className="text-white max-w-80 text-center">
+                        {playlists.name}
+                      </p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
           </div>
         )}
       </div>

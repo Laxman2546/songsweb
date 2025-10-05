@@ -40,77 +40,58 @@ const SearchResults: React.FC<SearchResultsProps> = ({ query }) => {
     fetchResults();
   }, [query]);
   return (
-    <div className="p-8 flex flex-col gap-5">
-      <div className="flex flex-row gap-8 ">
-        <div
-          className={`p-3 pl-8 pr-8 rounded-3xl  font-medium cursor-pointer ${
-            active == "Songs"
-              ? "bg-gradient-to-r from-blue-600 to-fuchsia-500 text-white"
-              : "bg-white text-black"
-          }`}
-          onClick={() => setActive("Songs")}
-        >
-          <p>Songs</p>
-        </div>
-        <div
-          className={`p-3 pl-8 pr-8 rounded-3xl  font-medium cursor-pointer ${
-            active == "Albums"
-              ? "bg-gradient-to-r from-blue-600 to-fuchsia-500 text-white"
-              : "bg-white text-black"
-          }`}
-          onClick={() => setActive("Albums")}
-        >
-          <p>Albums</p>
-        </div>
-        <div
-          className={`p-3 pl-8 pr-8 rounded-3xl  font-medium cursor-pointer ${
-            active == "Artists"
-              ? "bg-gradient-to-r from-blue-600 to-fuchsia-500 text-white"
-              : "bg-white text-black"
-          }`}
-          onClick={() => setActive("Artists")}
-        >
-          <p>Artists</p>
-        </div>
-        <div
-          className={`p-3 pl-8 pr-8 rounded-3xl  font-medium cursor-pointer ${
-            active == "Playlists"
-              ? "bg-gradient-to-r from-blue-600 to-fuchsia-500 text-white"
-              : "bg-white text-black"
-          }`}
-          onClick={() => setActive("Playlists")}
-        >
-          <p>Playlists</p>
-        </div>
+    <div className="p-4 sm:p-8 flex flex-col gap-5 w-full">
+      <div className="flex flex-wrap gap-3 sm:gap-6 justify-center sm:justify-start">
+        {["Songs", "Albums", "Artists", "Playlists"].map((tab) => (
+          <div
+            key={tab}
+            className={`px-5 py-2 sm:px-8 sm:py-3 rounded-3xl font-medium cursor-pointer text-sm sm:text-base transition-all duration-200 ${
+              active === tab
+                ? "bg-gradient-to-r from-blue-600 to-fuchsia-500 text-white shadow-md scale-105"
+                : "bg-white text-black hover:bg-gray-200"
+            }`}
+            onClick={() => setActive(tab)}
+          >
+            <p>{tab}</p>
+          </div>
+        ))}
       </div>
-      <div>
-        <h1 className="text-3xl font-bold">
-          Search results for "{query}" {active}
-        </h1>
-      </div>
-      <div>
+
+      <div className="w-full mt-2">
         {loading ? (
-          <div>
-            <h1 className="text-2xl font-semibold">Fetching songs...</h1>
+          <div className="text-center sm:text-left">
+            <h1 className="text-xl sm:text-2xl font-semibold animate-pulse">
+              Fetching {active.toLowerCase()}...
+            </h1>
           </div>
         ) : (
           <>
-            {resultsData.length < 1 || (albumData.length < 1 && !loading) ? (
-              <p className="text-3xl font-medium">No {active} found</p>
-            ) : active == "Songs" ? (
+            {resultsData.length < 1 ||
+            (albumData.length < 1 &&
+              !loading &&
+              active !== "Artists" &&
+              active !== "Playlists") ? (
+              <p className="text-center sm:text-left text-xl sm:text-2xl font-medium">
+                No {active} found
+              </p>
+            ) : active === "Songs" ? (
               <SongsComponent playlistData={resultsData} type="songs" />
-            ) : active == "Albums" ? (
+            ) : active === "Albums" ? (
               <SongsComponent playlistData={albumData} type="albums" />
-            ) : active == "Artists" ? (
+            ) : active === "Artists" ? (
               artistData.length > 1 ? (
                 <SongsComponent playlistData={artistData} type="artists" />
               ) : (
-                <p className="text-3xl font-medium">No {active} found</p>
+                <p className="text-center sm:text-left text-xl sm:text-2xl font-medium">
+                  No {active} found
+                </p>
               )
             ) : playlistData.length > 1 ? (
               <SongsComponent playlistData={playlistData} type="playlists" />
             ) : (
-              <p className="text-3xl font-medium">No {active} found</p>
+              <p className="text-center sm:text-left text-xl sm:text-2xl font-medium">
+                No {active} found
+              </p>
             )}
           </>
         )}
