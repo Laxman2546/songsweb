@@ -142,7 +142,7 @@ const PlayerCover = () => {
     if (!isMouseMoving) {
       gsap.to(textRef.current, {
         opacity: 1,
-        y: -30,
+        y: -80,
         duration: 0.5,
         ease: "power2.in",
         display: "block",
@@ -277,18 +277,18 @@ const PlayerCover = () => {
     return (
       <>
         {audioElement}
-        <div className="fixed bottom-0 w-full py-3 bg-black backdrop-blur-2xl rounded-t-xl z-50">
-          <div className="grid grid-cols-3 items-center px-6 gap-4">
-            <div className="flex items-center gap-3">
+        <div className="fixed bottom-0 w-full py-2 md:py-3 bg-black backdrop-blur-2xl rounded-t-xl z-50">
+          <div className="grid grid-cols-2 md:grid-cols-3 items-center px-3 md:px-6 gap-2 md:gap-4">
+            <div className="flex items-center gap-2 md:gap-3">
               <Image
                 src={songImg}
-                width={50}
-                height={50}
+                width={40}
+                height={40}
                 alt="mini cover"
-                className="rounded-md shadow-md"
+                className="rounded-md shadow-md md:w-[50px] md:h-[50px]"
               />
-              <div className="flex flex-col">
-                <h1 className="font-semibold text-white text-sm truncate max-w-[200px]">
+              <div className="flex flex-col min-w-0">
+                <h1 className="font-semibold text-white text-xs md:text-sm truncate max-w-[120px] sm:max-w-[200px]">
                   {music?.currentSong?.title || "Unknown Title"}
                 </h1>
                 <Link
@@ -305,14 +305,14 @@ const PlayerCover = () => {
                     },
                   }}
                 >
-                  <p className="text-gray-300 text-xs hover:cursor-pointer hover:underline">
+                  <p className="text-gray-300 text-xs hover:cursor-pointer hover:underline truncate">
                     {music?.currentSong?.artist || "Unknown Artist"}
                   </p>
                 </Link>
               </div>
             </div>
 
-            <div className="flex flex-col gap-3">
+            <div className="hidden md:flex flex-col gap-3">
               <div className="flex flex-row gap-6 items-center justify-center">
                 <FaShuffle
                   size={15}
@@ -419,7 +419,39 @@ const PlayerCover = () => {
               </div>
             </div>
 
-            <div className="flex items-center justify-end gap-4">
+            <div className="flex items-center justify-end gap-3 md:gap-4">
+              <div className="md:hidden">
+                {music?.isPlaying ? (
+                  <FaPauseCircle
+                    onClick={togglePlay}
+                    size={28}
+                    className="text-white bg-black rounded-full shadow-lg hover:scale-105 transition-transform cursor-pointer"
+                  />
+                ) : (
+                  <FaPlayCircle
+                    onClick={togglePlay}
+                    size={28}
+                    className="text-white bg-black rounded-full shadow-lg hover:scale-105 transition-transform cursor-pointer"
+                  />
+                )}
+              </div>
+
+              <div className="md:hidden">
+                {isLiked ? (
+                  <FaHeart
+                    size={18}
+                    onClick={() => handleDislike(music.currentSong)}
+                    className="text-white/80 cursor-pointer transition-transform hover:scale-110"
+                  />
+                ) : (
+                  <FaRegHeart
+                    size={18}
+                    onClick={() => handleLike(music.currentSong)}
+                    className="text-white/80 cursor-pointer transition-transform hover:scale-110"
+                  />
+                )}
+              </div>
+
               <MdFullscreen
                 size={24}
                 onClick={() => {
@@ -427,10 +459,59 @@ const PlayerCover = () => {
                 }}
                 className="cursor-pointer hover:scale-110 transition-transform text-white"
               />
-              <div className="text-white/60 text-lg hover:text-white cursor-pointer">
+              <div className="hidden sm:block text-white/60 text-lg hover:text-white cursor-pointer">
                 •••
               </div>
             </div>
+          </div>
+
+          <div className="md:hidden px-3 mt-2 flex items-center gap-2">
+            <p className="text-xs font-light text-white min-w-[35px]">
+              {formatTime(music?.progress)}
+            </p>
+            <input
+              type="range"
+              min={0}
+              max={music?.currentSong?.duration ?? 0}
+              step={1}
+              value={isSeeking ? seekValue : music?.progress ?? 0}
+              className="slider flex-1"
+              style={
+                {
+                  ["--progress" as any]: `${
+                    music?.currentSong?.duration
+                      ? ((isSeeking ? seekValue : music?.progress ?? 0) /
+                          music?.currentSong?.duration) *
+                        100
+                      : 0
+                  }%`,
+                } as React.CSSProperties
+              }
+              onChange={(e) => {
+                const val = Number(e.target.value);
+                setSeekValue(val);
+                setIsSeeking(true);
+              }}
+              onMouseUp={(e) => {
+                const newTime = Number((e.target as HTMLInputElement).value);
+                if (audioRef.current) {
+                  audioRef.current.currentTime = newTime;
+                }
+                music?.setProgress?.(newTime);
+                setIsSeeking(false);
+              }}
+              onTouchEnd={(e) => {
+                const newTime = Number((e.target as HTMLInputElement).value);
+                if (audioRef.current) {
+                  audioRef.current.currentTime = newTime;
+                }
+                music?.setProgress?.(newTime);
+                setIsSeeking(false);
+              }}
+            />
+            <p className="text-xs font-light text-white min-w-[35px] text-right">
+              {formatTime(music?.currentSong?.duration)}
+            </p>
           </div>
         </div>
       </>
@@ -468,7 +549,7 @@ const PlayerCover = () => {
           />
         </div>
         <div
-          className="absolute bottom-0 w-full py-8 px-5 flex flex-col"
+          className="absolute bottom-0 w-full  px-5 flex flex-col"
           ref={textRef}
         >
           <h1
@@ -488,155 +569,241 @@ const PlayerCover = () => {
           ref={controlsRef}
           className={`absolute bottom-0 w-full py-4 bg-black/95 backdrop-blur-2xl rounded-t-xl cursor-auto`}
         >
-          <div className="grid grid-cols-3 items-center px-6 gap-4">
-            <div className="flex items-center gap-3">
-              <Image
-                src={songImg}
-                width={50}
-                height={50}
-                alt="mini cover"
-                className="rounded-md shadow-md"
-              />
-              <div className="flex flex-col">
-                <h1 className="font-semibold text-white text-sm truncate max-w-[200px]">
-                  {music?.currentSong?.title || "Unknown Title"}
-                </h1>
-                <Link
-                  href={{
-                    pathname: `/artist/${encodeURIComponent(
-                      music?.currentSong?.artist
-                        ? music.currentSong.artist
-                        : "unknown"
-                    )}`,
-                    query: {
-                      id: music?.currentSong?.artistId
-                        ? music.currentSong.artistId
-                        : "741999",
-                    },
-                  }}
-                >
-                  <p
-                    className="text-gray-300 text-xs hover:cursor-pointer hover:underline"
-                    onClick={() => {
-                      setExpanded(false);
-                      exitFullscreen();
+          <div className="fixed bottom-0 w-full py-2 md:py-3 bg-black backdrop-blur-2xl rounded-t-xl z-50">
+            <div className="grid grid-cols-2 md:grid-cols-3 items-center px-3 md:px-6 gap-2 md:gap-4">
+              <div className="flex items-center gap-2 md:gap-3">
+                <Image
+                  src={songImg}
+                  width={40}
+                  height={40}
+                  alt="mini cover"
+                  className="rounded-md shadow-md md:w-[50px] md:h-[50px]"
+                />
+                <div className="flex flex-col min-w-0">
+                  <h1 className="font-semibold text-white text-xs md:text-sm truncate max-w-[120px] sm:max-w-[200px]">
+                    {music?.currentSong?.title || "Unknown Title"}
+                  </h1>
+                  <Link
+                    href={{
+                      pathname: `/artist/${encodeURIComponent(
+                        music?.currentSong?.artist
+                          ? music.currentSong.artist
+                          : "unknown"
+                      )}`,
+                      query: {
+                        id: music?.currentSong?.artistId
+                          ? music.currentSong.artistId
+                          : "741999",
+                      },
                     }}
                   >
-                    {music?.currentSong?.artist || "Unknown Artist"}
-                  </p>
-                </Link>
+                    <p className="text-gray-300 text-xs hover:cursor-pointer hover:underline truncate">
+                      {music?.currentSong?.artist || "Unknown Artist"}
+                    </p>
+                  </Link>
+                </div>
               </div>
-            </div>
 
-            <div className="flex flex-col gap-3">
-              <div className="flex flex-row gap-6 items-center justify-center">
-                <FaShuffle
-                  size={15}
-                  className={`cursor-pointer transition-transform hover:scale-110 ${
-                    music?.shuffleActive
-                      ? "bg-white text-black p-0.5 rounded-full size-4"
-                      : "text-white/80"
-                  }`}
-                  onClick={music?.toggleShuffle}
-                />
-                <FaBackwardStep
-                  onClick={music?.playPrev}
-                  size={20}
-                  className={`text-white/80  ${
-                    music?.currentIdx && music?.currentIdx > 0
-                      ? "cursor-pointer hover:text-white transition-transform hover:scale-110"
-                      : "cursor-not-allowed"
-                  }`}
-                />
-                {music?.isPlaying ? (
-                  <FaPauseCircle
-                    onClick={togglePlay}
-                    size={35}
-                    className="text-white bg-black rounded-full shadow-lg hover:scale-105 transition-transform cursor-pointer p-0.5"
+              <div className="hidden md:flex flex-col gap-3">
+                <div className="flex flex-row gap-6 items-center justify-center">
+                  <FaShuffle
+                    size={15}
+                    className={`cursor-pointer transition-transform hover:scale-110 ${
+                      music?.shuffleActive
+                        ? "bg-white text-black p-0.5 rounded-full size-4"
+                        : "text-white/80"
+                    }`}
+                    onClick={music?.toggleShuffle}
                   />
-                ) : (
-                  <FaPlayCircle
-                    onClick={togglePlay}
-                    size={35}
-                    className="text-white bg-black rounded-full shadow-lg hover:scale-105 transition-transform cursor-pointer p-0.5"
+                  <FaBackwardStep
+                    onClick={music?.playPrev}
+                    size={20}
+                    className={`text-white/80  ${
+                      music?.currentIdx && music?.currentIdx > 0
+                        ? "cursor-pointer hover:text-white transition-transform hover:scale-110"
+                        : "cursor-not-allowed"
+                    }`}
                   />
-                )}
+                  {music?.isPlaying ? (
+                    <FaPauseCircle
+                      onClick={togglePlay}
+                      size={35}
+                      className="text-white bg-black rounded-full shadow-lg hover:scale-105 transition-transform cursor-pointer p-0.5"
+                    />
+                  ) : (
+                    <FaPlayCircle
+                      onClick={togglePlay}
+                      size={35}
+                      className="text-white bg-black rounded-full shadow-lg hover:scale-105 transition-transform cursor-pointer p-0.5"
+                    />
+                  )}
 
-                <FaForwardStep
-                  onClick={music?.playNext}
-                  size={20}
-                  className={`text-white/80  ${
-                    music?.queue.length &&
-                    music.currentIdx == music?.queue.length - 1
-                      ? "cursor-not-allowed"
-                      : "cursor-pointer hover:text-white transition-transform hover:scale-110"
-                  }`}
-                />
-                <MdOutlineLoop
-                  size={20}
-                  className="text-white/80 cursor-pointer transition-transform hover:scale-110"
-                />
-                {isLiked ? (
-                  <FaHeart
+                  <FaForwardStep
+                    onClick={music?.playNext}
                     size={20}
-                    onClick={() => handleDislike(music.currentSong)}
-                    className="text-white/80 cursor-pointer transition-transform hover:scale-110 border-1 border-black"
+                    className={`text-white/80  ${
+                      music?.queue.length &&
+                      music.currentIdx == music?.queue.length - 1
+                        ? "cursor-not-allowed"
+                        : "cursor-pointer hover:text-white transition-transform hover:scale-110"
+                    }`}
                   />
-                ) : (
-                  <FaRegHeart
+                  <MdOutlineLoop
                     size={20}
-                    onClick={() => handleLike(music.currentSong)}
                     className="text-white/80 cursor-pointer transition-transform hover:scale-110"
                   />
-                )}
-              </div>
-              <div className="w-full flex flex-row gap-3 items-center justify-center">
-                <p className="text-sm font-light text-white">
-                  {formatTime(music?.progress)}
-                </p>
+                  {isLiked ? (
+                    <FaHeart
+                      size={20}
+                      onClick={() => handleDislike(music.currentSong)}
+                      className="text-white/80 cursor-pointer transition-transform hover:scale-110 border-1 border-black"
+                    />
+                  ) : (
+                    <FaRegHeart
+                      size={20}
+                      onClick={() => handleLike(music.currentSong)}
+                      className="text-white/80 cursor-pointer transition-transform hover:scale-110"
+                    />
+                  )}
+                </div>
+                <div className="w-full flex flex-row gap-3 items-center justify-center">
+                  <p className="text-sm font-light text-white">
+                    {formatTime(music?.progress)}
+                  </p>
 
-                <input
-                  type="range"
-                  min={0}
-                  max={music?.currentSong?.duration ?? 0}
-                  step={1}
-                  value={isSeeking ? seekValue : music?.progress ?? 0}
-                  className="slider"
-                  style={
-                    {
-                      ["--progress" as any]: `${
-                        music?.currentSong?.duration
-                          ? ((isSeeking ? seekValue : music?.progress ?? 0) /
-                              music?.currentSong?.duration) *
-                            100
-                          : 0
-                      }%`,
-                    } as React.CSSProperties
-                  }
-                  onChange={(e) => {
-                    const val = Number(e.target.value);
-                    setSeekValue(val);
-                    setIsSeeking(true);
-                  }}
-                  onMouseUp={(e) => {
-                    const newTime = Number(
-                      (e.target as HTMLInputElement).value
-                    );
-                    if (audioRef.current) {
-                      audioRef.current.currentTime = newTime;
+                  <input
+                    type="range"
+                    min={0}
+                    max={music?.currentSong?.duration ?? 0}
+                    step={1}
+                    value={isSeeking ? seekValue : music?.progress ?? 0}
+                    className="slider"
+                    style={
+                      {
+                        ["--progress" as any]: `${
+                          music?.currentSong?.duration
+                            ? ((isSeeking ? seekValue : music?.progress ?? 0) /
+                                music?.currentSong?.duration) *
+                              100
+                            : 0
+                        }%`,
+                      } as React.CSSProperties
                     }
-                    music?.setProgress?.(newTime);
-                    setIsSeeking(false);
+                    onChange={(e) => {
+                      const val = Number(e.target.value);
+                      setSeekValue(val);
+                      setIsSeeking(true);
+                    }}
+                    onMouseUp={(e) => {
+                      const newTime = Number(
+                        (e.target as HTMLInputElement).value
+                      );
+                      if (audioRef.current) {
+                        audioRef.current.currentTime = newTime;
+                      }
+                      music?.setProgress?.(newTime);
+                      setIsSeeking(false);
+                    }}
+                  />
+                  <p className="text-sm font-light text-white">
+                    {formatTime(music?.currentSong?.duration)}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-3 md:gap-4">
+                <div className="md:hidden">
+                  {music?.isPlaying ? (
+                    <FaPauseCircle
+                      onClick={togglePlay}
+                      size={28}
+                      className="text-white bg-black rounded-full shadow-lg hover:scale-105 transition-transform cursor-pointer"
+                    />
+                  ) : (
+                    <FaPlayCircle
+                      onClick={togglePlay}
+                      size={28}
+                      className="text-white bg-black rounded-full shadow-lg hover:scale-105 transition-transform cursor-pointer"
+                    />
+                  )}
+                </div>
+
+                <div className="md:hidden">
+                  {isLiked ? (
+                    <FaHeart
+                      size={18}
+                      onClick={() => handleDislike(music.currentSong)}
+                      className="text-white/80 cursor-pointer transition-transform hover:scale-110"
+                    />
+                  ) : (
+                    <FaRegHeart
+                      size={18}
+                      onClick={() => handleLike(music.currentSong)}
+                      className="text-white/80 cursor-pointer transition-transform hover:scale-110"
+                    />
+                  )}
+                </div>
+
+                <MdFullscreen
+                  size={24}
+                  onClick={() => {
+                    setExpanded(true);
                   }}
+                  className="cursor-pointer hover:scale-110 transition-transform text-white"
                 />
-                <p className="text-sm font-light text-white">
-                  {formatTime(music?.currentSong?.duration)}
-                </p>
+                <div className="hidden sm:block text-white/60 text-lg hover:text-white cursor-pointer">
+                  •••
+                </div>
               </div>
             </div>
 
-            <div className="flex items-center justify-end text-white/60 text-lg hover:text-white cursor-pointer">
-              •••
+            <div className="md:hidden px-3 mt-2 flex items-center gap-2">
+              <p className="text-xs font-light text-white min-w-[35px]">
+                {formatTime(music?.progress)}
+              </p>
+              <input
+                type="range"
+                min={0}
+                max={music?.currentSong?.duration ?? 0}
+                step={1}
+                value={isSeeking ? seekValue : music?.progress ?? 0}
+                className="slider flex-1"
+                style={
+                  {
+                    ["--progress" as any]: `${
+                      music?.currentSong?.duration
+                        ? ((isSeeking ? seekValue : music?.progress ?? 0) /
+                            music?.currentSong?.duration) *
+                          100
+                        : 0
+                    }%`,
+                  } as React.CSSProperties
+                }
+                onChange={(e) => {
+                  const val = Number(e.target.value);
+                  setSeekValue(val);
+                  setIsSeeking(true);
+                }}
+                onMouseUp={(e) => {
+                  const newTime = Number((e.target as HTMLInputElement).value);
+                  if (audioRef.current) {
+                    audioRef.current.currentTime = newTime;
+                  }
+                  music?.setProgress?.(newTime);
+                  setIsSeeking(false);
+                }}
+                onTouchEnd={(e) => {
+                  const newTime = Number((e.target as HTMLInputElement).value);
+                  if (audioRef.current) {
+                    audioRef.current.currentTime = newTime;
+                  }
+                  music?.setProgress?.(newTime);
+                  setIsSeeking(false);
+                }}
+              />
+              <p className="text-xs font-light text-white min-w-[35px] text-right">
+                {formatTime(music?.currentSong?.duration)}
+              </p>
             </div>
           </div>
         </div>

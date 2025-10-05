@@ -1,14 +1,11 @@
 "use client";
-import { useParams, useSearchParams } from "next/navigation";
-import { use, useContext, useEffect, useState } from "react";
-import React from "react";
 import Image from "next/image";
-import { getSongUrl } from "@/lib/api";
+import Link from "next/link";
+import { useContext, useEffect, useState, useRef } from "react";
 import { Vibrant } from "node-vibrant/browser";
 import defaultImg from "../../../public/default.png";
-import Link from "next/link";
 import { MusicContext } from "@/context/MusicContextProvider";
-
+import Marquee from "react-fast-marquee";
 const DetailsComponent = ({
   playlistData,
   playName,
@@ -27,9 +24,12 @@ const DetailsComponent = ({
   const [bgGradient, setBgGradient] = useState<string>(
     "linear-gradient(to bottom, #000, #111)"
   );
+  const textRef = useRef<HTMLSpanElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [isOverflowing, setIsOverflowing] = useState(false);
+
   useEffect(() => {
     if (!image) return;
-
     Vibrant.from(image)
       .getPalette()
       .then((palette: any) => {
@@ -47,7 +47,7 @@ const DetailsComponent = ({
     const safePercent = s.replace(/%(?![0-9A-Fa-f]{2})/g, "%25");
     try {
       return decodeURIComponent(safePercent);
-    } catch (err) {
+    } catch {
       return safePercent;
     }
   };
@@ -61,164 +61,157 @@ const DetailsComponent = ({
       .padStart(2, "0")}`;
   };
 
-  const countData = (count: number) => {
-    const formattedCount = new Intl.NumberFormat("en-US").format(count);
-    return formattedCount;
-  };
+  const countData = (count: number) =>
+    new Intl.NumberFormat("en-US").format(count);
+
   const songContext = useContext(MusicContext);
   if (!songContext) {
     throw new Error("MusicContext must be used within MusicContextProvider");
   }
-
   const { playSong } = songContext;
+  useEffect(() => {
+    if (!textRef.current || !containerRef.current) return;
+    const checkOverflow = () => {
+      const isOver =
+        textRef.current!.scrollWidth > containerRef.current!.clientWidth;
+      setIsOverflowing(isOver);
+    };
+    checkOverflow();
+    window.addEventListener("resize", checkOverflow);
+    return () => window.removeEventListener("resize", checkOverflow);
+  }, [playlistData]);
 
   return (
     <div className="w-full min-h-screen flex flex-col">
       <div
-        className="w-full p-12 rounded-t-2xl flex flex-row gap-5 items-center"
+        className="w-full p-6 md:p-12 flex flex-col md:flex-row items-center md:items-end gap-5 rounded-t-2xl"
         style={{ background: bgGradient }}
       >
         {image && (
           <Image
             src={image}
             width={240}
-            height={120}
-            className="rounded-md"
-            alt="songimage"
+            height={240}
+            className="rounded-md w-40 h-40 sm:w-52 sm:h-52 md:w-60 md:h-60 object-cover"
+            alt="playlist image"
           />
         )}
-        <div className="w-full flex flex-col gap-3">
-          <h1 className="text-white font-medium text-xl">{type}</h1>
-          <h1 className="text-white  font-extrabold text-7xl">
+        <div className="w-full flex flex-col gap-2 text-left">
+          <p className="text-gray-200 text-sm md:text-base font-medium uppercase">
+            {type}
+          </p>
+          <h1 className="text-white font-extrabold text-3xl sm:text-5xl md:text-6xl lg:text-7xl">
             {decodeURIComponent(playName)}
           </h1>
-          <div className="w-full flex flex-col gap-2">
-            <p className="text-xl font-medium">
-              {cleanSongName(playlistDescribe)}
-            </p>
-            <p className="font-medium text-xl text-nowrap">{count} Songs</p>
-          </div>
+          <p className="text-gray-200 text-base md:text-lg font-light italic">
+            {cleanSongName(playlistDescribe)}
+          </p>
+          <p className="text-gray-300 text-sm md:text-base">{count} Songs</p>
         </div>
       </div>
-      <div className="w-full flex flex-col gap-5 p-12">
-        <div className="flex flex-col">
-          <div className="max-w-full flex flex-row items-center justify-between p-2 pr-24">
-            <div className="flex flex-row items-center gap-12 pl-5">
-              <p className="text-right font-light text-sm text-gray-400 italic">
-                #
-              </p>
-              <h1 className=" font-light text-sm text-gray-400 italic">
-                Title
-              </h1>
-            </div>
-            <div className="flex flex-row items-center justify-center gap-8 text-white">
-              {type == "Playlist" ||
-                (type == "Album" && (
-                  <p className="w-20 text-right font-light text-sm text-gray-400 italic">
-                    Count
-                  </p>
-                ))}
-              <p className="w-40 truncate font-light text-sm text-gray-400 italic">
-                Album
-              </p>
-              <p className="w-16 text-right font-light text-sm text-gray-400 italic">
-                Duration
-              </p>
-            </div>
-          </div>
-          <span className="w-full h-[1px] bg-gray-200"></span>
-        </div>
-        {playlistData?.map((playlists: any, idx: number) => (
-          <div key={idx}>
-            <div className="max-w-full flex flex-row items-center justify-between p-2 pr-24 hover:bg-gray-500 rounded-xl">
-              <div className="flex flex-row items-center gap-6">
-                <div className="flex flex-row items-center gap-3">
-                  <h1 className="text-md w-8 text-right">{idx + 1}</h1>
-                  <Image
-                    src={
-                      playlists.image[1].url
-                        ? playlists.image[1].url
-                        : defaultImg
-                    }
-                    width={50}
-                    height={50}
-                    className="rounded-sm"
-                    alt="songimage"
-                  />
-                </div>
 
-                <div className="flex flex-col">
-                  <h1
-                    className="text-xl text-white font-sans font-medium cursor-pointer"
-                    onClick={() =>
-                      playSong(
-                        {
-                          url: playlists.downloadUrl[3]?.url,
-                          title: cleanSongName(playlists.name),
-                          artist:
-                            playlists.artists.primary[0]?.name || "Unknown",
-                          img:
-                            playlists.image[2]?.url ||
-                            playlists.image[1]?.url ||
-                            defaultImg.src,
-                          duration: playlists.duration,
-                          artistId: playlists.artists.primary[0].id,
-                          currentIdx: idx,
-                        },
-                        playlistData.map((p: any, i: number) => ({
-                          url: p.downloadUrl[3]?.url,
-                          title: cleanSongName(p.name),
-                          artist: p.artists.primary[0]?.name || "Unknown",
-                          img:
-                            p.image[2]?.url || p.img[1].url || defaultImg.src,
-                          duration: p.duration,
-                          artistId: p.artists.primary[0].id,
-                          currentIdx: i,
-                        })),
-                        idx
-                      )
-                    }
-                  >
-                    {cleanSongName(playlists.name) || "unknown"}
-                  </h1>
-                  <Link
-                    href={{
-                      pathname: `/artist/${encodeURIComponent(
-                        playlists.artists.primary[0]
-                          ? playlists.artists.primary[0].name
-                          : "unknown"
-                      )}`,
-                      query: {
-                        id: playlists.artists.primary[0]
-                          ? playlists.artists.primary[0].id
-                          : "741999",
+      <div className="w-full flex flex-col gap-4 p-4 sm:p-8 md:p-12 mb-24">
+        <div className="hidden sm:flex flex-row items-center justify-between text-gray-400 italic text-sm border-b border-gray-700 pb-2">
+          <div className="flex flex-row items-center gap-10 pl-3">
+            <p>#</p>
+            <p>Title</p>
+          </div>
+          <div className="flex flex-row items-center justify-center gap-6">
+            {(type === "Playlist" || type === "Album") && <p>Count</p>}
+            <p className="w-32">Album</p>
+            <p>Duration</p>
+          </div>
+        </div>
+
+        {playlistData?.map((playlists: any, idx: number) => (
+          <div
+            key={idx}
+            className="flex flex-row items-center justify-between p-2 sm:p-3 rounded-xl hover:bg-gray-500 transition-all duration-200"
+          >
+            <div className="flex flex-row items-center gap-3 sm:gap-6 w-3/4 sm:w-2/3">
+              <p className="hidden sm:block text-gray-300 w-6 text-sm sm:text-base">
+                {idx + 1}
+              </p>
+              <Image
+                src={playlists.image[1]?.url || defaultImg}
+                width={50}
+                height={50}
+                className="rounded-md object-cover"
+                alt="song image"
+              />
+              <div
+                className="w-full flex flex-col text-left sm:text-left overflow-hidden whitespace-nowrap"
+                ref={containerRef}
+              >
+                <span
+                  ref={textRef}
+                  className="relative block text-white font-medium text-sm sm:text-lg cursor-pointer hover:underline"
+                  onClick={() =>
+                    playSong(
+                      {
+                        url: playlists.downloadUrl[3]?.url,
+                        title: cleanSongName(playlists.name),
+                        artist: playlists.artists.primary[0]?.name || "Unknown",
+                        img:
+                          playlists.image[2]?.url ||
+                          playlists.image[1]?.url ||
+                          defaultImg.src,
+                        duration: playlists.duration,
+                        artistId: playlists.artists.primary[0]?.id,
+                        currentIdx: idx,
                       },
-                    }}
-                  >
-                    <p className="text-md text-white cursor-pointer hover:underline">
-                      {playlists.artists.primary[0]
-                        ? playlists.artists.primary[0].name
-                        : "unknown"}
-                    </p>
-                  </Link>
-                </div>
-              </div>
-              <div className="flex flex-row items-center gap-8 text-white">
-                {type == "Playlist" ||
-                  (type == "Album" && (
-                    <p className="w-20 text-right">
-                      {countData(playlists.playCount)}
-                    </p>
-                  ))}
-                <Link href={{ pathname: `/album/${playlists.album.id}` }}>
-                  <p className="w-40 truncate cursor-pointer hover:underline">
-                    {cleanSongName(playlists.album.name || "unknown")}
+                      playlistData.map((p: any, i: number) => ({
+                        url: p.downloadUrl[3]?.url,
+                        title: cleanSongName(p.name),
+                        artist: p.artists.primary[0]?.name || "Unknown",
+                        img:
+                          p.image[2]?.url || p.image[1]?.url || defaultImg.src,
+                        duration: p.duration,
+                        artistId: p.artists.primary[0]?.id,
+                        currentIdx: i,
+                      })),
+                      idx
+                    )
+                  }
+                >
+                  {isOverflowing ? (
+                    <Marquee gradient={false} speed={20} pauseOnHover>
+                      {cleanSongName(playlists.name) || "unknown"}
+                    </Marquee>
+                  ) : (
+                    cleanSongName(playlists.name) || "unknown"
+                  )}
+                </span>
+
+                <Link
+                  href={{
+                    pathname: `/artist/${encodeURIComponent(
+                      playlists.artists.primary[0]?.name || "unknown"
+                    )}`,
+                    query: {
+                      id: playlists.artists.primary[0]?.id || "741999",
+                    },
+                  }}
+                >
+                  <p className="text-gray-300 text-left text-xs sm:text-sm hover:underline">
+                    {playlists.artists.primary[0]?.name || "unknown"}
                   </p>
                 </Link>
-                <p className="w-16 text-right">
-                  {durationMin(playlists.duration)}
-                </p>
               </div>
+            </div>
+
+            <div className="  flex flex-row items-end sm:items-center gap-4 text-gray-300 text-sm sm:text-base">
+              {(type === "Playlist" || type === "Album") && (
+                <p className="hidden sm:block">
+                  {countData(playlists.playCount)}
+                </p>
+              )}
+              <Link href={{ pathname: `/album/${playlists.album.id}` }}>
+                <p className="hidden sm:block sm:w-40 truncate hover:underline">
+                  {cleanSongName(playlists.album.name || "unknown")}
+                </p>
+              </Link>
+              <p>{durationMin(playlists.duration)}</p>
             </div>
           </div>
         ))}
