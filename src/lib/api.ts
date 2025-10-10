@@ -22,15 +22,12 @@ export const getTrendingSongs = async () => {
       axios.get(
         `${API_BASE_URL}/search/playlists?query=telugu&page=1&limit=1000`
       ),
+      axios.get(`${API_BASE_URL}/search/playlists?query=spb&page=1&limit=100`),
       axios.get(
-        `${API_BASE_URL}/search/playlists?query=hindi&page=1&limit=1000`
-      ),
-      axios.get(
-        `${API_BASE_URL}/search/playlists?query=english&page=1&limit=1000`
+        `${API_BASE_URL}/search/playlists?query=alluarjun&page=1&limit=100`
       ),
     ];
 
- 
     const responses = await Promise.all(requests);
     const allResults = responses.flatMap((res) => res.data.data.results);
 
@@ -136,6 +133,18 @@ export const getSongSuggestions = async (id: any): Promise<string | any> => {
   try {
     const { data } = await axios.get<SongUrlResponse>(
       `${API_BASE_URL}/songs/${id}/suggestions?limit=100`
+    );
+    return data.data;
+  } catch (e) {
+    console.error("Something went wrong while fetching the song URL:", e);
+    throw e;
+  }
+};
+
+export const getTrendingSongUrl = async (id: string): Promise<string> => {
+  try {
+    const { data } = await axios.get<SongUrlResponse>(
+      `${API_BASE_URL}/playlists?link=${id}&limit=100`
     );
     return data.data;
   } catch (e) {
