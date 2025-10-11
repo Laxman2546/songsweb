@@ -66,8 +66,8 @@ const page = () => {
   }
   const { playSong } = songContext;
   return (
-    <div className="w-full">
-      <h1 className="text-2xl sm:text-3xl font-semibold p-4">Liked Songs</h1>
+    <div className="w-full p-4">
+      <h1 className="text-2xl sm:text-3xl font-bold p-4">Liked Songs</h1>
 
       {likedSongs?.map((playlists: any, idx: number) => (
         <div

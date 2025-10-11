@@ -419,8 +419,17 @@ const PlayerCover = () => {
               </div>
             </div>
 
-            <div className="flex items-center justify-end gap-3 md:gap-4">
-              <div className="md:hidden">
+            <div className="flex flex-row items-center justify-end gap-3 md:gap-4">
+              <div className="md:hidden flex flex-row items-center gap-3">
+                <FaBackwardStep
+                  onClick={music?.playPrev}
+                  size={20}
+                  className={`text-white/80  ${
+                    music?.currentIdx && music?.currentIdx > 0
+                      ? "cursor-pointer hover:text-white transition-transform hover:scale-110"
+                      : "cursor-not-allowed"
+                  }`}
+                />
                 {music?.isPlaying ? (
                   <FaPauseCircle
                     onClick={togglePlay}
@@ -435,7 +444,16 @@ const PlayerCover = () => {
                   />
                 )}
               </div>
-
+              <FaForwardStep
+                onClick={music?.playNext}
+                size={20}
+                className={`text-white/80  ${
+                  music?.queue.length &&
+                  music.currentIdx == music?.queue.length - 1
+                    ? "cursor-not-allowed"
+                    : "cursor-pointer hover:text-white transition-transform hover:scale-110"
+                }`}
+              />
               <div className="md:hidden">
                 {isLiked ? (
                   <FaHeart
@@ -545,21 +563,21 @@ const PlayerCover = () => {
             alt={"songimage"}
             width={550}
             height={550}
-            className="rounded-2xl shadow-xl object-cover"
+            className="rounded-2xl w-[250] h-[250] md:w-[550] md:h-[550] shadow-xl object-cover"
           />
         </div>
         <div
-          className="absolute bottom-0 w-full  px-5 flex flex-col"
+          className="absolute -bottom-8 w-full  px-5 flex flex-col"
           ref={textRef}
         >
           <h1
-            className="text-2xl font-bold text-white drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,0.8)]
+            className="text-md md:text-2xl font-bold text-white drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,0.8)]
 "
           >
             {music.currentSong.title}
           </h1>
           <h1
-            className="text-xl font-semibold text-gray-100 drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,0.8)]
+            className="text-xs md:text-xl font-semibold text-gray-100 drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,0.8)]
 "
           >
             {music.currentSong.artist}
@@ -584,6 +602,10 @@ const PlayerCover = () => {
                     {music?.currentSong?.title || "Unknown Title"}
                   </h1>
                   <Link
+                    onClick={() => {
+                      setExpanded(false);
+                      exitFullscreen();
+                    }}
                     href={{
                       pathname: `/artist/${encodeURIComponent(
                         music?.currentSong?.artist

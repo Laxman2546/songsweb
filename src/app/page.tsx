@@ -5,11 +5,13 @@ import Loader from "./components/Loader";
 import HomeSection from "./components/HomeSection";
 import Image from "next/image";
 import Link from "next/link";
+import SongsHome from "./components/SongsHome";
 export interface songDet {
   id: string;
   name: string;
   image: { url: string }[];
 }
+
 export default function home() {
   const [songsData, setsongsData] = useState<songDet[]>([]);
   const [madeForyou, setMadeForyou] = useState<songDet[]>([]);
@@ -17,6 +19,9 @@ export default function home() {
   const [yearlyPicks, setYearlyPicks] = useState<songDet[]>([]);
   const [topPicks, setTopPicks] = useState<songDet[]>([]);
   const [trendingSongs, setTrendingSongs] = useState<any>([]);
+  const [viralSongs, setViralSongs] = useState<any>([]);
+  const [remixSongs, setRemixSongs] = useState<any>([]);
+  const [latestSongs, setLatestSongs] = useState<any>([]);
   const [loading, setLoading] = useState<boolean>(false);
   useEffect(() => {
     const getsongs = async () => {
@@ -72,7 +77,38 @@ export default function home() {
   const getTrendingSongsbylink = async (query: string) => {
     try {
       const songsResult = await getTrendingSongUrl(query);
+      // @ts-ignore
       setTrendingSongs(songsResult.songs);
+      console.log(songsResult, "iam trending songs");
+    } catch (e) {
+      console.log("something went wrong with api", e);
+    }
+  };
+  const getViralSongsbylink = async (query: string) => {
+    try {
+      const songsResult = await getTrendingSongUrl(query);
+      // @ts-ignore
+      setViralSongs(songsResult.songs);
+      console.log(songsResult, "iam trending songs");
+    } catch (e) {
+      console.log("something went wrong with api", e);
+    }
+  };
+  const getRemixSongsbylink = async (query: string) => {
+    try {
+      const songsResult = await getTrendingSongUrl(query);
+      // @ts-ignore
+      setRemixSongs(songsResult.songs);
+      console.log(songsResult, "iam trending songs");
+    } catch (e) {
+      console.log("something went wrong with api", e);
+    }
+  };
+  const getLatestSongsbylink = async (query: string) => {
+    try {
+      const songsResult = await getTrendingSongUrl(query);
+      // @ts-ignore
+      setLatestSongs(songsResult.songs);
       console.log(songsResult, "iam trending songs");
     } catch (e) {
       console.log("something went wrong with api", e);
@@ -81,6 +117,15 @@ export default function home() {
   useEffect(() => {
     getTrendingSongsbylink(
       "https://www.jiosaavn.com/featured/kotha-tunes/bDjUXq26B5Y_"
+    );
+    getViralSongsbylink(
+      "https://www.jiosaavn.com/featured/telugu-viral-hits/vid44GJ,K8FieSJqt9HmOQ__"
+    );
+    getRemixSongsbylink(
+      "https://www.jiosaavn.com/featured/tollywood-remix/PxoHToC8KT9uOxiEGmm6lQ__"
+    );
+    getLatestSongsbylink(
+      "https://www.jiosaavn.com/featured/trending-telugu-songs/DIuc0Vliz9eWfAFNItf,3Q__"
     );
   }, []);
 
@@ -92,33 +137,29 @@ export default function home() {
             <Loader />
           </div>
         ) : (
-          <div className="w-full flex flex-col gap-5 pl-8">
-            <div className="w-full mt-5 grid grid-cols-3 md:grid-cols-6 lg:grid-cols-6  gap-5 items-center justify-center">
-              {trendingSongs.slice(0, 6).map((song, idx) => (
-                <Link
-                  href={{
-                    pathname: `/player/${song.id}`,
-                    query: {
-                      img: song.image[2].url || song.image[0].url,
-                    },
-                  }}
-                  key={idx}
-                >
-                  <div className="flex flex-col gap-5 cursor-pointer">
-                    <Image
-                      src={song.image[2].url || song.image[0].url}
-                      alt="song image"
-                      width={280}
-                      height={160}
-                      className="rounded-xl"
-                    />
-                    <p className="text-white max-w-80 text-center">
-                      {song.name}
-                    </p>
-                  </div>
-                </Link>
-              ))}
-            </div>
+          <div className="w-full flex flex-col gap-5 pl-8 mb-24">
+            <SongsHome
+              title="Recently Released"
+              subtitle="Listen latest released songs"
+              data={trendingSongs}
+            />
+            <SongsHome
+              title="Trending Songs"
+              data={latestSongs}
+              subtitle="The sound of the moment — updated daily."
+            />
+            <SongsHome
+              title="ViralSongs"
+              data={viralSongs}
+              subtitle="The songs everyone’s talking about"
+            />
+
+            <SongsHome
+              title="Remix Flow"
+              subtitle="Smooth transitions, endless energy"
+              data={remixSongs}
+            />
+
             <HomeSection title="Artsist picks" data={artistPick} />
             <HomeSection
               subtitle="Made for you"
