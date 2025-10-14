@@ -17,6 +17,7 @@ const page = () => {
   const fetchArtist = async (page: number) => {
     try {
       const response = await getArtist(decodeURIComponent(artistname));
+      // @ts-ignore
       setartistImage(response.results[0].image[2].url);
       if (response && artistId) {
         const getArtistSongs = await getArtistSongsbyID(artistId, page);

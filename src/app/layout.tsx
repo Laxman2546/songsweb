@@ -6,6 +6,7 @@ import { ScrollToTop } from "./components/ScrollTop";
 import SearchHandler from "./components/SearchHandler";
 import MusicContextProvider from "@/context/MusicContextProvider";
 import PlayerCover from "./components/Player";
+import { Suspense } from "react";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -35,7 +36,9 @@ export default function RootLayout({
         <MusicContextProvider>
           <ScrollToTop />
           <Navbar />
-          <SearchHandler>{children}</SearchHandler>
+          <Suspense>
+            <SearchHandler>{children}</SearchHandler>
+          </Suspense>
           <div className="fixed bottom-0 left-0 w-full z-50">
             <PlayerCover />
           </div>

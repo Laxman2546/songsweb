@@ -391,6 +391,7 @@ const PlayerCover = () => {
                       ["--progress" as any]: `${
                         music?.currentSong?.duration
                           ? ((isSeeking ? seekValue : music?.progress ?? 0) /
+                              // @ts-ignore
                               music?.currentSong?.duration) *
                             100
                           : 0
@@ -499,6 +500,7 @@ const PlayerCover = () => {
                   ["--progress" as any]: `${
                     music?.currentSong?.duration
                       ? ((isSeeking ? seekValue : music?.progress ?? 0) /
+                          // @ts-ignore
                           music?.currentSong?.duration) *
                         100
                       : 0
@@ -705,6 +707,7 @@ const PlayerCover = () => {
                         ["--progress" as any]: `${
                           music?.currentSong?.duration
                             ? ((isSeeking ? seekValue : music?.progress ?? 0) /
+                                // @ts-ignore
                                 music?.currentSong?.duration) *
                               100
                             : 0
@@ -810,6 +813,7 @@ const PlayerCover = () => {
                     ["--progress" as any]: `${
                       music?.currentSong?.duration
                         ? ((isSeeking ? seekValue : music?.progress ?? 0) /
+                            // @ts-ignore
                             music?.currentSong?.duration) *
                           100
                         : 0

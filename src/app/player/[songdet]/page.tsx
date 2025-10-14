@@ -29,9 +29,13 @@ export default function songDetails() {
       try {
         setLoading(true);
         const response = await getSongUrl(playlistId);
+        // @ts-ignore
         setplaylistData(response ? [response.songs] : []);
+        // @ts-ignore
         setplaylistName(response ? response.name : undefined);
+        // @ts-ignore
         setSongNo(response ? response.songCount : undefined);
+        // @ts-ignore
         setplaylistDescription(response ? response.description || "" : "");
       } catch (e) {
         console.log(e, "have an error with the url");
