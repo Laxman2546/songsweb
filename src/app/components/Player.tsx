@@ -563,9 +563,9 @@ const PlayerCover = () => {
           <Image
             src={songImg}
             alt={"songimage"}
-            width={550}
-            height={550}
-            className="rounded-2xl w-[250] h-[250] md:w-[550] md:h-[550] shadow-xl object-cover"
+            width={350}
+            height={350}
+            className="rounded-2xl w-[250] h-[250] md:w-[350] md:h-[350] shadow-xl object-cover"
           />
         </div>
         <div
