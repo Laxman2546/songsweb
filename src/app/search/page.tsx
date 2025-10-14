@@ -1,3 +1,4 @@
+"use client";
 import { getQuerySongs, getAlbums, getArtists, getPlaylists } from "@/lib/api";
 import React, { useEffect, useState } from "react";
 import SongsComponent from "../components/SongsComponent.";
