@@ -4,7 +4,7 @@ import LoaderGif from "../../../public/Equalizer.gif";
 const Loader = () => {
   return (
     <div className="w-full flex flex-col items-center justify-center">
-      <Image src={LoaderGif} alt="loader" />
+      <Image src={LoaderGif} alt="loader" className="w-24 h-24"/>
       <h1 className="text-center">Loading Songs...</h1>
     </div>
   );

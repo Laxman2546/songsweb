@@ -72,21 +72,23 @@ export default function Navbar() {
       </div>
 
       <div className="hidden md:flex flex-row items-center gap-8">
-        <button className="flex flex-row items-center gap-2 rounded-full px-2 py-1 text-white transition-colors cursor-pointer hover:bg-accent hover:text-black">
-          {" "}
-          <CircleArrowDown size={24} className="shrink-0" />{" "}
-          <span className="text-nowrap font-medium text-md ">
-            {" "}
-            Install App{" "}
-          </span>{" "}
-        </button>
+        <a href="https://nanimusic.vercel.app/" target="_blank">
+          <button className="flex flex-row items-center gap-2 rounded-full px-2 py-1 text-white transition-colors cursor-pointer hover:bg-accent hover:text-black">
+            <CircleArrowDown size={24} className="shrink-0" />
+            <span className="text-nowrap font-medium text-md ">
+              Install App
+            </span>
+          </button>
+        </a>
         <div className="flex flex-row items-center gap-6 text-white">
-          <abbr title="Notifications">
-            <Bell
-              size={22}
-              className="cursor-pointer hover:scale-110 transition"
-            />
-          </abbr>
+          <Link href={"/notifications"}>
+            <abbr title="Notifications">
+              <Bell
+                size={22}
+                className="cursor-pointer hover:scale-110 transition"
+              />
+            </abbr>
+          </Link>
           <Link href={"/likedsongs"}>
             <abbr title="Liked Songs">
               <HeartIcon
@@ -133,15 +135,16 @@ export default function Navbar() {
               <HeartIcon size={20} /> Liked Songs
             </div>
           </Link>
-
-          <button className="flex items-center gap-2 text-white pl-5 font-semibold">
-            <CircleArrowDown size={20} /> Install App
-          </button>
-
-          <div className="flex items-center gap-2 text-white pl-5 font-semibold">
-            <Bell size={20} /> Notifications
-          </div>
-
+          <a href="https://nanimusic.vercel.app/" target="_blank">
+            <button className="flex items-center gap-2 text-white pl-5 font-semibold">
+              <CircleArrowDown size={20} /> Install App
+            </button>
+          </a>
+          <Link href={"/notifications"}>
+            <div className="flex items-center gap-2 text-white pl-5 font-semibold">
+              <Bell size={20} /> Notifications
+            </div>
+          </Link>
           <div className="flex items-center gap-2 text-white pl-5 font-semibold">
             <UserCircle size={20} /> Account
           </div>
