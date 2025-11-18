@@ -6,6 +6,8 @@ import HomeSection from "./components/HomeSection";
 import Image from "next/image";
 import Link from "next/link";
 import SongsHome from "./components/SongsHome";
+import Note from "./components/Note";
+import { useRouter } from "next/navigation";
 export interface songDet {
   id: string;
   name: string;
@@ -23,6 +25,9 @@ export default function home() {
   const [remixSongs, setRemixSongs] = useState<any>([]);
   const [latestSongs, setLatestSongs] = useState<any>([]);
   const [loading, setLoading] = useState<boolean>(false);
+  const [isNote, setNote] = useState(true);
+  const router = useRouter();
+
   useEffect(() => {
     const getsongs = async () => {
       try {
@@ -128,6 +133,16 @@ export default function home() {
       "https://www.jiosaavn.com/featured/trending-telugu-songs/DIuc0Vliz9eWfAFNItf,3Q__"
     );
   }, []);
+  const handleGoback = () => {
+    router.push("https://www.google.com/");
+  };
+  const handleUnderStand = () => {
+    localStorage.setItem("isNote", "false");
+    setNote(false);
+  };
+  useEffect(() => {
+    localStorage.getItem("isNote") === "false" && setNote(false);
+  }, []);
 
   return (
     <section className="w-full min-h-screen">
@@ -137,46 +152,61 @@ export default function home() {
             <Loader />
           </div>
         ) : (
-          <div className="w-full flex flex-col gap-5 pl-8 mb-24">
-            <SongsHome
-              title="Recently Released"
-              subtitle="Listen latest released songs"
-              data={trendingSongs}
-            />
-            <SongsHome
-              title="Trending Songs"
-              data={latestSongs}
-              subtitle="The sound of the moment — updated daily."
-            />
-            <SongsHome
-              title="ViralSongs"
-              data={viralSongs}
-              subtitle="The songs everyone’s talking about"
-            />
+          <>
+            {isNote && (
+              <div className="absolute w-full min-h-[calc(100vh-100px)] flex items-center justify-center z-50">
+                <Note
+                  handleGoback={handleGoback}
+                  handleUnderStand={handleUnderStand}
+                />
+              </div>
+            )}
 
-            <SongsHome
-              title="Remix Flow"
-              subtitle="Smooth transitions, endless energy"
-              data={remixSongs}
-            />
+            <div
+              className={`w-full flex flex-col gap-5 pl-8 mb-24 ${
+                isNote ? "blur-lg overflow-hidden " : "blur-none"
+              }`}
+            >
+              <SongsHome
+                title="Recently Released"
+                subtitle="Listen latest released songs"
+                data={trendingSongs}
+              />
+              <SongsHome
+                title="Trending Songs"
+                data={latestSongs}
+                subtitle="The sound of the moment — updated daily."
+              />
+              <SongsHome
+                title="ViralSongs"
+                data={viralSongs}
+                subtitle="The songs everyone’s talking about"
+              />
 
-            <HomeSection title="Artsist picks" data={artistPick} />
-            <HomeSection
-              subtitle="Made for you"
-              title="Playlists"
-              data={madeForyou}
-            />
-            <HomeSection
-              title="Music Through the Years"
-              subtitle={"From retro classics to 2000 hits"}
-              data={yearlyPicks}
-            />
-            <HomeSection
-              title="Top Picks"
-              data={topPicks}
-              subtitle={"A blend of the best — just for you."}
-            />
-          </div>
+              <SongsHome
+                title="Remix Flow"
+                subtitle="Smooth transitions, endless energy"
+                data={remixSongs}
+              />
+
+              <HomeSection title="Artsist picks" data={artistPick} />
+              <HomeSection
+                subtitle="Made for you"
+                title="Playlists"
+                data={madeForyou}
+              />
+              <HomeSection
+                title="Music Through the Years"
+                subtitle={"From retro classics to 2000 hits"}
+                data={yearlyPicks}
+              />
+              <HomeSection
+                title="Top Picks"
+                data={topPicks}
+                subtitle={"A blend of the best — just for you."}
+              />
+            </div>
+          </>
         )}
       </div>
     </section>

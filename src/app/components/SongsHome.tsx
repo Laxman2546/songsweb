@@ -113,6 +113,35 @@ const SongsHome = ({
               >
                 <div className="relative group">
                   <Image
+                    onClick={() =>
+                      playSong(
+                        {
+                          url: song.downloadUrl[3]?.url,
+                          title: cleanSongName(song.name),
+                          artist: song.artists.primary[0]?.name || "Unknown",
+                          img:
+                            song.image[2]?.url ||
+                            song.image[1]?.url ||
+                            defaultImg.src,
+                          duration: song.duration,
+                          artistId: song.artists.primary[0]?.id,
+                          currentIdx: idx,
+                        },
+                        data.map((p: any, i: number) => ({
+                          url: p.downloadUrl[3]?.url,
+                          title: cleanSongName(p.name),
+                          artist: p.artists.primary[0]?.name || "Unknown",
+                          img:
+                            p.image[2]?.url ||
+                            p.image[1]?.url ||
+                            defaultImg.src,
+                          duration: p.duration,
+                          artistId: p.artists.primary[0]?.id,
+                          currentIdx: i,
+                        })),
+                        idx
+                      )
+                    }
                     src={song.image[2]?.url || song.image[0]?.url}
                     alt="song image"
                     width={180}

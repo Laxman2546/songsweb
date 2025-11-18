@@ -445,16 +445,7 @@ const PlayerCover = () => {
                   />
                 )}
               </div>
-              <FaForwardStep
-                onClick={music?.playNext}
-                size={20}
-                className={`text-white/80  ${
-                  music?.queue.length &&
-                  music.currentIdx == music?.queue.length - 1
-                    ? "cursor-not-allowed"
-                    : "cursor-pointer hover:text-white transition-transform hover:scale-110"
-                }`}
-              />
+
               <div className="md:hidden">
                 {isLiked ? (
                   <FaHeart
@@ -478,9 +469,6 @@ const PlayerCover = () => {
                 }}
                 className="cursor-pointer hover:scale-110 transition-transform text-white"
               />
-              <div className="hidden sm:block text-white/60 text-lg hover:text-white cursor-pointer">
-                •••
-              </div>
             </div>
           </div>
 
