@@ -16,8 +16,10 @@ import Link from "next/link";
 import gsap from "gsap";
 import { FaRegHeart } from "react-icons/fa";
 import { MdFullscreen } from "react-icons/md";
+import { useRouter } from "next/navigation";
 
 const PlayerCover = () => {
+  const router = useRouter();
   const [isSeeking, setIsSeeking] = useState(false);
   const [seekValue, setSeekValue] = useState<number>(0);
   const music = useContext(MusicContext);
@@ -34,7 +36,6 @@ const PlayerCover = () => {
     "linear-gradient(to bottom, #000, #111)"
   );
   const [expanded, setExpanded] = useState(false);
-
   const handleMouseMove = () => {
     setIsMouseMoving(true);
     clearTimeout(timeoutRef.current as NodeJS.Timeout);
@@ -177,6 +178,14 @@ const PlayerCover = () => {
 
     document.addEventListener("keydown", handleKeyPress);
     return () => document.removeEventListener("keydown", handleKeyPress);
+  }, [music?.isPlaying]);
+  useEffect(() => {
+    window.addEventListener("popstate", () => {
+      setExpanded(false);
+      exitFullscreen();
+      router.push("/");
+    });
+    return () => window.removeEventListener("popstate", () => {});
   }, [music?.isPlaying]);
 
   const formatTime = (seconds?: any) => {

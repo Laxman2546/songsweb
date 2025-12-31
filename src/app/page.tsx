@@ -1,12 +1,11 @@
 "use client";
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect } from "react";
 import { getTrendingSongs, getTrendingSongUrl } from "@/lib/api";
 import Loader from "./components/Loader";
 import HomeSection from "./components/HomeSection";
-import Image from "next/image";
-import Link from "next/link";
 import SongsHome from "./components/SongsHome";
 import Note from "./components/Note";
+import { fmData } from "../utils/radio";
 import { useRouter } from "next/navigation";
 export interface songDet {
   id: string;
@@ -27,7 +26,7 @@ export default function home() {
   const [loading, setLoading] = useState<boolean>(false);
   const [isNote, setNote] = useState(true);
   const router = useRouter();
-
+  console.log(remixSongs, "iam remix");
   useEffect(() => {
     const getsongs = async () => {
       try {
@@ -188,7 +187,11 @@ export default function home() {
                 subtitle="Smooth transitions, endless energy"
                 data={remixSongs}
               />
-
+              {/* <SongsHome
+                title="Live Radio"
+                subtitle="Listen to the radio"
+                data={fmData}
+              /> */}
               <HomeSection title="Artsist picks" data={artistPick} />
               <HomeSection
                 subtitle="Made for you"

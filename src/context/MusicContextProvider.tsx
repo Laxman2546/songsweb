@@ -1,5 +1,5 @@
 "use client";
-import React, { createContext, useState, ReactNode } from "react";
+import React, { createContext, useState, ReactNode, useEffect } from "react";
 
 type Song = {
   url: string;
@@ -54,6 +54,43 @@ export default function MusicContextProvider({
     setCurrentIdx(index);
     setShuffleActive(false);
   };
+  useEffect(() => {
+    if ("mediaSession" in navigator) {
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: currentSong ? currentSong?.title : "Song title",
+        artist: currentSong?.artist || "Artist Name",
+        album: currentSong?.title,
+        artwork: [
+          {
+            src: currentSong?.img || "/logo.png",
+            sizes: "512x512",
+            type: "image/png",
+          },
+        ],
+      });
+      navigator.mediaSession.setActionHandler("play", () => {
+        setIsPlaying(true);
+      });
+      navigator.mediaSession.setActionHandler("pause", () => {
+        setIsPlaying(false);
+      });
+      navigator.mediaSession.setActionHandler("previoustrack", () => {
+        playPrev();
+      });
+      navigator.mediaSession.setActionHandler("nexttrack", () => {
+        playNext();
+      });
+      navigator.mediaSession.setActionHandler("seekbackward", () => {
+        setProgress(0);
+      });
+      navigator.mediaSession.setActionHandler("seekforward", () => {
+        setProgress(100);
+      });
+      navigator.mediaSession.setActionHandler("stop", () => {
+        setIsPlaying(false);
+      });
+    }
+  }, [currentSong]);
   const playNext = () => {
     if (currentIdx < queue.length - 1) {
       setCurrentSong(queue[currentIdx + 1]);
