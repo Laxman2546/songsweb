@@ -83,7 +83,6 @@ export default function home() {
       const songsResult = await getTrendingSongUrl(query);
       // @ts-ignore
       setTrendingSongs(songsResult.songs);
-      console.log(songsResult, "iam trending songs");
     } catch (e) {
       console.log("something went wrong with api", e);
     }
